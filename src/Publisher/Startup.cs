@@ -1,7 +1,6 @@
 using ASyncFramework.Application;
 using ASyncFramework.Application.Common.Interfaces;
 using ASyncFramework.Domain.Common;
-using ASyncFramework.Domain.Interface;
 using ASyncFramework.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,7 +11,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Publisher.Filters;
 using Publisher.Service;
-using System.Collections.Generic;
 
 namespace Publisher
 {

@@ -3,19 +3,16 @@ using ASyncFramework.Domain.Common;
 using ASyncFramework.Domain.Interface;
 using ASyncFramework.Domain.Model;
 using Microsoft.Extensions.Options;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Mime;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ASyncFramework.Application.SubscribeRequestLogic
 {
-    public class SubscriberLogic
+    public class SubscriberLogic : ISubscriberLogic
     {
         private string _token;
         private readonly IConvertFromCodeHttpToObject _convertFromCodeHttpToObject;
@@ -40,7 +37,7 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
             var awaiter = taskHttpRequestMessage.GetAwaiter();
 
             // send request 
-            var httpResponseMessage= await SendRequest(message, taskHttpRequestMessage);
+            var httpResponseMessage = await SendRequest(message, taskHttpRequestMessage);
 
             // if call Back message 
             if (message.IsCallBackMessage)
@@ -48,7 +45,7 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
                 // if call back message success stop function 
                 if (httpResponseMessage.IsSuccessStatusCode)
                 {
-                    return;         
+                    return;
                 }
                 // if call back message not success retry 
                 // retry 
@@ -67,7 +64,7 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
             if (httpResponseMessage.StatusCode >= System.Net.HttpStatusCode.InternalServerError)
             {
                 // retry 
-                _=Retry(message);
+                _ = Retry(message);
             }
         }
 
@@ -114,7 +111,7 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
             using HttpClient client = new HttpClient();
             using HttpRequestMessage httpRequestMessage = new HttpRequestMessage(new HttpMethod(message.TargetVerb.ToString()), message.TargetUrl);
             httpRequestMessage.Content = new StringContent(message.ContentBody, Encoding.UTF8, "application/json");
-            client.DefaultRequestHeaders.Add("ASyncCallHttpStatucCode",message.HttpStatusCode);
+            client.DefaultRequestHeaders.Add("ASyncCallHttpStatucCode", message.HttpStatusCode);
             foreach (var header in message.Headers)
                 httpRequestMessage.Headers.Add(header.Key, header.Value);
             // wait token 
@@ -123,13 +120,13 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
             return await client.SendAsync(httpRequestMessage);
         }
 
-        private async Task GetToken (Task<HttpRequestMessage> taskHttpRequestMessage)
+        private async Task GetToken(Task<HttpRequestMessage> taskHttpRequestMessage)
         {
             HttpRequestMessage httpRequestMessage = await taskHttpRequestMessage;
             using HttpClient client = new HttpClient();
             var httpResponseMessage = await client.SendAsync(httpRequestMessage);
             string content = await httpResponseMessage.Content.ReadAsStringAsync();
-            _token = System.Text.Json.JsonSerializer.Deserialize<AuthModel>(content).accessToken;
+            _token = System.Text.Json.JsonSerializer.Deserialize<AuthModel>(content, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true }).accessToken;
         }
     }
 }

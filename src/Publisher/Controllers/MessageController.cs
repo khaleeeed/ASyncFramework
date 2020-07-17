@@ -15,5 +15,11 @@ namespace Publisher.Controllers
         {
              return await Mediator.Send(command);
         }
+
+        [HttpGet]
+        public async Task<object> Get ()
+        {
+            
+        }
     }
 }

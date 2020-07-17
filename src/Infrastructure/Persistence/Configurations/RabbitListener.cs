@@ -46,7 +46,7 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
             _connection.Close();
             return Task.CompletedTask;
         }
-        public abstract bool Process(string message);
+        public abstract bool Process(string content);
         public void Register(string exchange, string queue, IDictionary<string, object> argu, string exchangeType)
         {
             Channel.ExchangeDeclare(exchange, exchangeType, true, false, argu);

@@ -4,6 +4,8 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using ASyncFramework.Application.PushRequestLogic;
+using ASyncFramework.Domain.Interface;
+using ASyncFramework.Application.SubscribeRequestLogic;
 
 namespace ASyncFramework.Application
 {
@@ -17,6 +19,7 @@ namespace ASyncFramework.Application
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
             services.AddScoped<IPushRequestLogic, PushRequestLogic.PushRequestLogic>();
+            services.AddScoped<ISubscriberLogic,SubscriberLogic>();
             return services;
         }
     }

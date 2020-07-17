@@ -9,22 +9,22 @@ using System.Text;
 
 namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber
 {
-    public class FiveMinuteQueue : RabbitListener
+    public class CallBackFailuerQueue : RabbitListener
     {
-        protected override string ExchangeName => "FiveMinuteExchange";
+        protected override string ExchangeName => "CallBackFailuerExchange";
         protected override string ExchangeType => "x-delayed-message";
-        protected override Dictionary<string, object> ExchangeArgu => new Dictionary<string, object>{{"x-delayed-type", "direct"}};
-        protected override string QueueName => "FiveMinuteQueue";
-
+        protected override Dictionary<string, object> ExchangeArgu => new Dictionary<string, object> { { "x-delayed-type", "direct" } };
+        protected override string QueueName => "CallBackFailuerQueue";
+        
         private readonly ISubscriberLogic _subscriberLogic;
-        public FiveMinuteQueue(IOptions<AppConfiguration> options, ISubscriberLogic subscriberLogic) : base(options)
+        public CallBackFailuerQueue(IOptions<AppConfiguration> options,ISubscriberLogic subscriberLogic) : base(options)
         {
             _subscriberLogic = subscriberLogic;
         }
 
         public override bool Process(string content)
         {
-            var message = System.Text.Json.JsonSerializer.Deserialize<Message>(content);
+            var message = System.Text.Json.JsonSerializer.Deserialize<Message>(content); 
             _subscriberLogic.Subscribe(message);
             return true;
         }
