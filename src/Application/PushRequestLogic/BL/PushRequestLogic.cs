@@ -38,10 +38,10 @@ namespace ASyncFramework.Application.PushRequestLogic
             QueueConfiguration queueConfiguration = _queueConfiguration[((IEnumerable<string>)request.Queue.Split(",", StringSplitOptions.None)).First()];
             Message message = new Message()
             {
-                CallBackUri = request.CallBackUri,
+                CallBackUrl = request.CallBackUrl,
                 ContentBody = System.Text.Json.JsonSerializer.Serialize(request.ContentBody),
                 OAuthHttpCode = request.OAuthHttpCode,
-                Queue = request.Queue,
+                Queues = request.Queue,
                 Retry = queueConfiguration.QueueRetry,
                 TargetUrl = request.TargetUrl,
                 TargetVerb = request.TargetVerb,
@@ -59,7 +59,7 @@ namespace ASyncFramework.Application.PushRequestLogic
 
         public Task<Result> Push(Message message)
         {
-            QueueConfiguration queueConfiguration = _queueConfiguration[((IEnumerable<string>)message.Queue.Split(",")).First()];
+            QueueConfiguration queueConfiguration = _queueConfiguration[((IEnumerable<string>)message.Queues.Split(",")).First()];
             using (_rabbitProducers)
                 _rabbitProducers.PushMessage(message, queueConfiguration);
             return Task.FromResult(new Result(true, null)

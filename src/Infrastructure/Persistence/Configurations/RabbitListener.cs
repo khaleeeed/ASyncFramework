@@ -58,17 +58,16 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
 
 
         }
-
-        private void _timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            StartAsync(new CancellationToken());
-        }
-
         public Task StopAsync(CancellationToken cancellationToken)
         {
             _connection.Close();
             return Task.CompletedTask;
         }
+        private void _timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            StartAsync(new CancellationToken());
+        }
+
         public abstract bool Process(string content);
         public void Register(string exchange, string queue, IDictionary<string, object> argu, string exchangeType)
         {

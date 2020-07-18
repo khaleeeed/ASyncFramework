@@ -12,8 +12,8 @@ namespace ASyncFramework.Domain.Model
         public string OAuthHttpCode { get; set; }
         public string ContentBody { get; set; }
         public string TargetUrl { get; set; }
-        public string CallBackUri { get; set; }
-        public string Queue { get; set; }
+        public string CallBackUrl { get; set; }
+        public string Queues { get; set; }
         public TargetVerb TargetVerb { get; set; }
         public int Retry { get; set; }
         public bool IsCallBackMessage { get; set; }

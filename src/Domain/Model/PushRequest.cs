@@ -10,11 +10,9 @@ namespace ASyncFramework.Domain.Model
         public string OAuthHttpCode { get; set; }
         public object ContentBody { get; set; }
         public string TargetUrl { get; set; }
-        public string CallBackUri { get; set; }
+        public string CallBackUrl { get; set; }
         public string Queue { get; set; }
         public TargetVerb TargetVerb { get; set; }
         public string CallBackOAuthHttpCode { get; set; }
-
-
     }
 }

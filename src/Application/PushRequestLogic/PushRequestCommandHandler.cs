@@ -10,10 +10,6 @@ using System.Threading.Tasks;
 
 namespace ASyncFramework.Application.PushRequestLogic
 {
-    public class PushRequestCommand:IRequest<Result>
-    {
-        public PushRequest PushRequestModel { get; set; }
-    }
     public class PushRequestCommandHandler : IRequestHandler<PushRequestCommand, Result>
     {
         private readonly IPushRequestLogic _pushRequestLogic;
@@ -28,4 +24,10 @@ namespace ASyncFramework.Application.PushRequestLogic
             return _pushRequestLogic.Push(request.PushRequestModel);
         }
     }
+
+    public class PushRequestCommand:IRequest<Result>
+    {
+        public PushRequest PushRequestModel { get; set; }
+    }
+    
 }

@@ -34,7 +34,6 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
             var taskHttpRequestMessage = Task.Run(() => _convertFromCodeHttpToObject.Convert(message.OAuthHttpCode));
             // get token 
             await taskHttpRequestMessage.ContinueWith(GetToken);
-            var awaiter = taskHttpRequestMessage.GetAwaiter();
 
             // send request 
             var httpResponseMessage = await SendRequest(message, taskHttpRequestMessage);
@@ -49,7 +48,7 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
                 }
                 // if call back message not success retry 
                 // retry 
-                _ = Retry(message);
+                _ = Retry(message,true);
             }
 
             // success or user error push message to queue for call  callbackService 
@@ -58,7 +57,6 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
                 await PushForCallBackApi(message, httpResponseMessage);
                 return;
             }
-
 
             // service error retry 
             if (httpResponseMessage.StatusCode >= System.Net.HttpStatusCode.InternalServerError)
@@ -73,12 +71,12 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
             // if there no retry in queue push to next long queue 
             if (message.Retry <= 0)
             {
-                var Queues = message.Queue.Split(',');
+                var Queues = message.Queues.Split(',');
                 // messageCallBack push message to call back fauiler queues 
                 if (Queues.Length < 2 && isMessageCallBack==true)
                 {
                     var queueConfig= _queueConfiguration.Value["CallBackFailuer"];
-                    message.Queue = queueConfig.QueueName;
+                    message.Queues = queueConfig.QueueName;
                     message.Retry = queueConfig.QueueRetry;
                     _ = _pushRequestLogic.Push(message);
                     return Task.CompletedTask;
@@ -88,7 +86,7 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
                 {
                     return Task.CompletedTask;
                 }
-                message.Queue = Queues.Skip(1).Aggregate((x, y) => $"{x},{y}");
+                message.Queues = Queues.Skip(1).Aggregate((x, y) => $"{x},{y}");
                 message.Retry = _queueConfiguration.Value[Queues.Skip(1).FirstOrDefault()].QueueRetry + 1;
             }
             message.Retry -= 1;
@@ -99,14 +97,14 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
 
         private async Task PushForCallBackApi(Message message, HttpResponseMessage httpResponseMessage)
         {
-            var queue = _queueConfiguration.Value.Keys.Select(x => x).Aggregate((x, y) => $"{x},{y}");
+            var queues = _queueConfiguration.Value.Keys.Select(x => x).Aggregate((x, y) => $"{x},{y}");
             var conent = await httpResponseMessage.Content?.ReadAsStringAsync();
             _ = _pushRequestLogic.Push(new Message
             {
-                TargetUrl = message.CallBackUri,
+                TargetUrl = message.CallBackUrl,
                 ContentBody = conent,
                 IsCallBackMessage = true,
-                Queue = queue,
+                Queues = queues,
                 OAuthHttpCode = message.OAuthHttpCodeCallBack,
                 ReferenceNumber = message.ReferenceNumber,
                 TargetVerb = Domain.Enums.TargetVerb.Post,
