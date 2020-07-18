@@ -68,12 +68,21 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
             }
         }
 
-        private Task Retry(Message message)
+        private Task Retry(Message message,bool isMessageCallBack=false)
         {
             // if there no retry in queue push to next long queue 
             if (message.Retry <= 0)
             {
                 var Queues = message.Queue.Split(',');
+                // messageCallBack push message to call back fauiler queues 
+                if (Queues.Length < 2 && isMessageCallBack==true)
+                {
+                    var queueConfig= _queueConfiguration.Value["CallBackFailuer"];
+                    message.Queue = queueConfig.QueueName;
+                    message.Retry = queueConfig.QueueRetry;
+                    _ = _pushRequestLogic.Push(message);
+                    return Task.CompletedTask;
+                }
                 // check if there next long queue else request will lost 
                 if (Queues.Length < 2)
                 {
@@ -99,7 +108,7 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
                 IsCallBackMessage = true,
                 Queue = queue,
                 OAuthHttpCode = message.OAuthHttpCodeCallBack,
-                RefranceNumber = message.RefranceNumber,
+                ReferenceNumber = message.ReferenceNumber,
                 TargetVerb = Domain.Enums.TargetVerb.Post,
                 Retry = _queueConfiguration.Value.Values.First().QueueRetry,
                 HttpStatusCode = httpResponseMessage.StatusCode.ToString()

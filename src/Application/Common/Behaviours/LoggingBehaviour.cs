@@ -21,10 +21,9 @@ namespace ASyncFramework.Application.Common.Behaviours
         {
             var requestName = typeof(TRequest).Name;
             var userId = _currentUserService.SystemUser ?? string.Empty;
-            string userName = string.Empty;
 
-            _logger.LogInformation("ASyncFramework Request: {Name} {@UserId} {@UserName} {@Request}",
-                requestName, userId, userName, request);
+            _logger.LogInformation("ASyncFramework Request: {Name} {@UserId} {@Request}",
+                requestName, userId, request);
 
             await Task.CompletedTask;
         }

@@ -1,6 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using ASyncFramework.Application.Common.Models;
 using ASyncFramework.Application.PushRequestLogic;
+using ASyncFramework.Application.QueryQueueDescription;
+using ASyncFramework.Domain.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Publisher.Controllers
@@ -16,10 +19,10 @@ namespace Publisher.Controllers
              return await Mediator.Send(command);
         }
 
-        [HttpGet]
-        public async Task<object> Get ()
+        [HttpGet("queue")]
+        public async Task<List<QueueDescription>> Get ()
         {
-            
+            return await Mediator.Send(new GetDescriptionQuery());
         }
     }
 }

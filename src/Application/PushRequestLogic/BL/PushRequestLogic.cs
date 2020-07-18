@@ -45,7 +45,7 @@ namespace ASyncFramework.Application.PushRequestLogic
                 Retry = queueConfiguration.QueueRetry,
                 TargetUrl = request.TargetUrl,
                 TargetVerb = request.TargetVerb,
-                RefranceNumber = _referenceNumber.ReferenceNumber,
+                ReferenceNumber = _referenceNumber.ReferenceNumber,
                 OAuthHttpCodeCallBack=request.CallBackOAuthHttpCode,
                              
             };
@@ -59,12 +59,12 @@ namespace ASyncFramework.Application.PushRequestLogic
 
         public Task<Result> Push(Message message)
         {
-            QueueConfiguration queueConfiguration = _queueConfiguration[((IEnumerable<string>)message.Queue.Split(",", StringSplitOptions.None)).First()];
+            QueueConfiguration queueConfiguration = _queueConfiguration[((IEnumerable<string>)message.Queue.Split(",")).First()];
             using (_rabbitProducers)
                 _rabbitProducers.PushMessage(message, queueConfiguration);
             return Task.FromResult(new Result(true, null)
             {
-                ReferenceNumber = _referenceNumber.ReferenceNumber
+                ReferenceNumber = message.ReferenceNumber
             });
         }
     }

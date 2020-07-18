@@ -16,6 +16,7 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
 {
     public abstract class RabbitListener : IHostedService ,IDisposable
     {
+        System.Timers.Timer _timer;
         private readonly ConnectionFactory _factory;
         private  IConnection _connection;
         private IModel _channel;
@@ -37,8 +38,30 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
         }
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            Register(ExchangeName,QueueName,ExchangeArgu,ExchangeType);
-            return Task.CompletedTask;
+            try
+            {
+                Register(ExchangeName, QueueName, ExchangeArgu, ExchangeType);
+                if (_timer != null) _timer.Dispose();
+                return Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                // log exc
+
+                // retry to connect 
+                _timer = new System.Timers.Timer();
+                _timer.Interval = 600000;
+                _timer.Elapsed += _timer_Elapsed;
+                _timer.Start();
+                return Task.CompletedTask;
+            }
+
+
+        }
+
+        private void _timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            StartAsync(new CancellationToken());
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

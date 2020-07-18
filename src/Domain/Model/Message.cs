@@ -7,7 +7,7 @@ namespace ASyncFramework.Domain.Model
 {
     public class Message
     {
-        public string RefranceNumber { get; set; }
+        public string ReferenceNumber { get; set; }
         public Dictionary<string,string> Headers { get;  set; }
         public string OAuthHttpCode { get; set; }
         public string ContentBody { get; set; }

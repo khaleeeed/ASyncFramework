@@ -18,8 +18,7 @@ namespace ASyncFramework.Application
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformanceBehaviour<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
-            services.AddScoped<IPushRequestLogic, PushRequestLogic.PushRequestLogic>();
-            services.AddScoped<ISubscriberLogic,SubscriberLogic>();
+            services.AddTransient<IPushRequestLogic, PushRequestLogic.PushRequestLogic>();
             return services;
         }
     }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ASyncFramework.Application;
 using ASyncFramework.Application.Common.Interfaces;
+using ASyncFramework.Application.SubscribeRequestLogic;
 using ASyncFramework.Domain.Common;
 using ASyncFramework.Domain.Interface;
 using ASyncFramework.Infrastructure;
@@ -37,6 +38,7 @@ namespace Subscriber
         {
             services.AddApplication();
             services.AddInfrastructure(Configuration);
+            services.AddTransient<ISubscriberLogic, SubscriberLogic>();
             services.AddHostedService<DirectQueue>();
             services.AddHostedService<FiveMinuteQueue>();
             services.AddHostedService<OneHourQueue>();
@@ -50,10 +52,10 @@ namespace Subscriber
             services.AddHealthChecks().AddRabbitMQ((s) => { var app = s.GetService<IOptions<AppConfiguration>>(); return new RabbitMQ.Client.ConnectionFactory() { HostName = app.Value.RabbitHost, Password = app.Value.RabbitPassword, UserName = app.Value.RabbitUserName }; });
            
             services.AddHttpContextAccessor();
-            services.AddScoped<IConvertFromCodeHttpToObject, ConvertFromCodeHttpToObject>();
+            services.AddTransient<IConvertFromCodeHttpToObject, ConvertFromCodeHttpToObject>();
 
             services.AddScoped<ICurrentUserService, CurrentUserService>();
-            services.AddScoped<IReferenceNumberService, ReferenceNumberService>();
+            services.AddTransient<IReferenceNumberService, ReferenceNumberService>();
             services.AddScoped<IAllHeadersPerRequest, AllHeadersPerRequest>();
         }
 
