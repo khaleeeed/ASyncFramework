@@ -56,7 +56,7 @@ namespace Subscriber
 
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddTransient<IReferenceNumberService, ReferenceNumberService>();
-            services.AddScoped<IAllHeadersPerRequest, AllHeadersPerRequest>();
+            services.AddTransient<IAllHeadersPerRequest, AllHeadersPerRequest>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

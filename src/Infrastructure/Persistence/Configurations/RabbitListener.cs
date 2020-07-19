@@ -95,7 +95,8 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
 
         public void Dispose()
         {
-            _channel.Dispose();
+            _channel?.Dispose();
+            _channel = null;
         }
     }
 }

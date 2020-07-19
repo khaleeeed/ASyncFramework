@@ -27,6 +27,7 @@ namespace ASyncFramework.Application.PushRequestLogic
 
     public class PushRequestCommand:IRequest<Result>
     {
+        public object MyProperty { get; set; }
         public PushRequest PushRequestModel { get; set; }
     }
     

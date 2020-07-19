@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace ASyncFramework.Domain.Model
 {
     public class AuthModel
     {
-        public string accessToken { get; set; }
+        [JsonPropertyName("access_Token")]
+        public string token { get; set; }
     }
 }

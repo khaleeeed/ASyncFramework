@@ -11,7 +11,7 @@ namespace Publisher.Service
     {
         public ReferenceNumberService()
         {
-            ReferenceNumber = new Guid().ToString();
+            ReferenceNumber = Guid.NewGuid().ToString();
         }
 
         public string ReferenceNumber { get; private set; }

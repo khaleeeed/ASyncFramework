@@ -14,5 +14,6 @@ namespace ASyncFramework.Domain.Model
         public string Queue { get; set; }
         public TargetVerb TargetVerb { get; set; }
         public string CallBackOAuthHttpCode { get; set; }
+        public object MyProperty { get; set; }
     }
 }

@@ -28,6 +28,7 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
 
         public async Task Subscribe(Message message)
         {
+
             System.Net.ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(delegate { return true; });
 
             // get httpRequest Message 
@@ -99,6 +100,7 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
         {
             var queues = _queueConfiguration.Value.Keys.Select(x => x).Aggregate((x, y) => $"{x},{y}");
             var conent = await httpResponseMessage.Content?.ReadAsStringAsync();
+            var headers=httpResponseMessage.Headers?.ToDictionary(k => k.Key, k => k.Value.ToString());
             _ = _pushRequestLogic.Push(new Message
             {
                 TargetUrl = message.CallBackUrl,
@@ -109,7 +111,9 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
                 ReferenceNumber = message.ReferenceNumber,
                 TargetVerb = Domain.Enums.TargetVerb.Post,
                 Retry = _queueConfiguration.Value.Values.First().QueueRetry,
-                HttpStatusCode = httpResponseMessage.StatusCode.ToString()
+                HttpStatusCode = httpResponseMessage.StatusCode.ToString(),
+                Headers=headers
+                
             });
         }
 
@@ -119,6 +123,7 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
             using HttpRequestMessage httpRequestMessage = new HttpRequestMessage(new HttpMethod(message.TargetVerb.ToString()), message.TargetUrl);
             httpRequestMessage.Content = new StringContent(message.ContentBody, Encoding.UTF8, "application/json");
             client.DefaultRequestHeaders.Add("ASyncCallHttpStatucCode", message.HttpStatusCode);
+            if(message.Headers!=null)
             foreach (var header in message.Headers)
                 httpRequestMessage.Headers.Add(header.Key, header.Value);
             // wait token 
@@ -133,7 +138,7 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
             using HttpClient client = new HttpClient();
             var httpResponseMessage = await client.SendAsync(httpRequestMessage);
             string content = await httpResponseMessage.Content.ReadAsStringAsync();
-            _token = System.Text.Json.JsonSerializer.Deserialize<AuthModel>(content, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true }).accessToken;
+            _token = System.Text.Json.JsonSerializer.Deserialize<AuthModel>(content, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true }).token;
         }
     }
 }

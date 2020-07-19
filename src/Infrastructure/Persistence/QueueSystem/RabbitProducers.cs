@@ -48,6 +48,7 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem
         public void Dispose()
         {
             _channel?.Dispose();
+            _channel = null;
         }
 
 

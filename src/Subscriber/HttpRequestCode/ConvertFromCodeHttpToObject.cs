@@ -12,9 +12,9 @@ namespace Subscriber.HttpRequestCode
 {
     public class ConvertFromCodeHttpToObject : IHttpRequestLineHandler, IHttpHeadersHandler, IConvertFromCodeHttpToObject
     {
-        Dictionary<string, string> headers = new Dictionary<string, string>();
-        string url = string.Empty;
-        string httpMethod = string.Empty;
+        private Dictionary<string, string> headers { get; set; }=new Dictionary<string, string>();
+        private string url { get; set; }
+        private string httpMethod { get; set; }
         public HttpRequestMessage Convert(string codeHttp)
         {
 
@@ -33,9 +33,9 @@ namespace Subscriber.HttpRequestCode
             string body = Encoding.UTF8.GetString(buffer.ToArray());
 
             
-            HttpRequestMessage request = new HttpRequestMessage(new System.Net.Http.HttpMethod(httpMethod), url);
+            HttpRequestMessage request = new HttpRequestMessage(new System.Net.Http.HttpMethod(app.httpMethod), app.url);
             request.Content = string.IsNullOrWhiteSpace(body) ? null : new StringContent(body, Encoding.UTF8, "application/json");
-            foreach (var header in headers)
+            foreach (var header in app.headers)
             {
                 request.Headers.Add(header.Key, header.Value);
             }
@@ -44,11 +44,12 @@ namespace Subscriber.HttpRequestCode
 
         public void OnHeader(Span<byte> name, Span<byte> value)
         {
+
             var headerName = Encoding.UTF8.GetString(name);
             var headerValue = Encoding.UTF8.GetString(value);
             if (headerName == "Host")
             {
-                url += headerValue;
+                url = "https://"+headerValue+url;
             }
             else
             {

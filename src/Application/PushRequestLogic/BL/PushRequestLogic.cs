@@ -22,20 +22,25 @@ namespace ASyncFramework.Application.PushRequestLogic
         private readonly IRabbitProducers _rabbitProducers;
         private readonly IReferenceNumberService _referenceNumber;
         private readonly Dictionary<string, QueueConfiguration> _queueConfiguration;
+        private readonly IAllHeadersPerRequest _allHeaders;
 
         public PushRequestLogic(
           IRabbitProducers rabbitProducers,
           IReferenceNumberService referenceNumber,
-          IOptions<Dictionary<string, QueueConfiguration>> queueConfiguration)
+          IOptions<Dictionary<string, QueueConfiguration>> queueConfiguration,
+            IAllHeadersPerRequest allHeaders)
         {
             _rabbitProducers = rabbitProducers;
             _referenceNumber = referenceNumber;
             _queueConfiguration = queueConfiguration.Value;
+            _allHeaders = allHeaders;
         }
+
 
         public Task<Result> Push(PushRequest request)
         {
             QueueConfiguration queueConfiguration = _queueConfiguration[((IEnumerable<string>)request.Queue.Split(",", StringSplitOptions.None)).First()];
+            
             Message message = new Message()
             {
                 CallBackUrl = request.CallBackUrl,
@@ -47,10 +52,14 @@ namespace ASyncFramework.Application.PushRequestLogic
                 TargetVerb = request.TargetVerb,
                 ReferenceNumber = _referenceNumber.ReferenceNumber,
                 OAuthHttpCodeCallBack=request.CallBackOAuthHttpCode,
+                Headers=_allHeaders.Headrs
+               
                              
             };
             using (_rabbitProducers)
+            {
                 _rabbitProducers.PushMessage(message, queueConfiguration);
+            }
             return Task.FromResult(new Result(true, null)
             {
                 ReferenceNumber = _referenceNumber.ReferenceNumber

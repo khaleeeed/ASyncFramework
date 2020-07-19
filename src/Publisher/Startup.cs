@@ -30,13 +30,18 @@ namespace Publisher
             services.AddInfrastructure(Configuration);
 
 
-            services.AddControllers(options=>options.Filters.Add(new ApiExceptionFilter()));
+            services.AddControllers(options => options.Filters.Add(new ApiExceptionFilter()))
+                .AddNewtonsoftJson();
+               
+
 
             services.AddOpenApiDocument(configure =>
             {
                 configure.Title = "Publisher API";
                 configure.AllowReferencesWithProperties = true;
+                configure.DefaultReferenceTypeNullHandling = NJsonSchema.Generation.ReferenceTypeNullHandling.NotNull;
                 configure.DefaultEnumHandling = NJsonSchema.Generation.EnumHandling.String;
+
 
             });
 

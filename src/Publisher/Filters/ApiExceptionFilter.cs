@@ -44,8 +44,9 @@ namespace Publisher.Filters
         }
 
         private void HandleUnknownException(ExceptionContext context)
-        {
-            var details = new Result(false, new List<string> { "An error occurred while processing your request.", System.Text.Json.JsonSerializer.Serialize(context.Exception) })
+        {           
+            var exceptionString = Newtonsoft.Json.JsonConvert.SerializeObject(context.Exception);
+            var details = new Result(false, new List<string> { "An error occurred while processing your request.",exceptionString  })
             {
                 ReferenceNumber = Guid.NewGuid().ToString()
             };
