@@ -1,5 +1,7 @@
 ﻿using ASyncFramework.Application.Common.Models;
+using ASyncFramework.Domain.Enums;
 using ASyncFramework.Domain.Model;
+using ASyncFramework.Domain.Model.Request;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -21,14 +23,22 @@ namespace ASyncFramework.Application.PushRequestLogic
 
         public Task<Result> Handle(PushRequestCommand request, CancellationToken cancellationToken)
         {
-            return _pushRequestLogic.Push(request.PushRequestModel);
+            return _pushRequestLogic.Push(request);
         }
     }
 
     public class PushRequestCommand:IRequest<Result>
     {
-        public object MyProperty { get; set; }
-        public PushRequest PushRequestModel { get; set; }
+        /// <summary>
+        /// send queues id sperated by , for queue description call api/message/queue          
+        /// </summary>
+        public string Queues { get; set; }
+
+        public Request TargetOAuthRequest { get; set; }
+        public PushRequest TargetRequest { get; set; }
+
+        public CallBackRequest CallBackRequest { get; set; }
+        public Request CallBackOAuthRequest { get; set; }
     }
     
 }

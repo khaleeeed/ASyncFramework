@@ -7,6 +7,6 @@ namespace ASyncFramework.Application.PushRequestLogic
     public interface IPushRequestLogic
     {
         Task<Result> Push(Message message);
-        Task<Result> Push(PushRequest request);
+        Task<Result> Push(PushRequestCommand request);
     }
 }

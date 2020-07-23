@@ -6,4 +6,8 @@
     <AssemblyName>ASyncFramework.Domain</AssemblyName>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Model\Message.cs~RF108941d.TMP" />
+  </ItemGroup>
+
 </Project>

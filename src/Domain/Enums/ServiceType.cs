@@ -4,12 +4,9 @@ using System.Text;
 
 namespace ASyncFramework.Domain.Enums
 {
-    public enum TargetVerb
+    public enum ServiceType
     {
-        Get,
-        Post,
-        Delete,
-        Put,
-        Patch            
+        RESTful,
+        SOAP
     }
 }

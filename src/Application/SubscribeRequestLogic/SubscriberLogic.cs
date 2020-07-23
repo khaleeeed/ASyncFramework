@@ -15,11 +15,11 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
     public class SubscriberLogic : ISubscriberLogic
     {
         private string _token;
-        private readonly IConvertFromCodeHttpToObject _convertFromCodeHttpToObject;
+        private readonly IConvertRequestToHttpRequestMessage _convertFromCodeHttpToObject;
         private readonly IPushRequestLogic _pushRequestLogic;
         private readonly IOptions<Dictionary<string, QueueConfiguration>> _queueConfiguration;
 
-        public SubscriberLogic(IConvertFromCodeHttpToObject convertFromCodeHttpToObject, IPushRequestLogic pushRequestLogic, IOptions<Dictionary<string, QueueConfiguration>> queueConfiguration)
+        public SubscriberLogic(IConvertRequestToHttpRequestMessage convertFromCodeHttpToObject, IPushRequestLogic pushRequestLogic, IOptions<Dictionary<string, QueueConfiguration>> queueConfiguration)
         {
             _convertFromCodeHttpToObject = convertFromCodeHttpToObject;
             _pushRequestLogic = pushRequestLogic;
@@ -30,12 +30,16 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
         {
 
             System.Net.ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(delegate { return true; });
-
-            // get httpRequest Message 
-            var taskHttpRequestMessage = Task.Run(() => _convertFromCodeHttpToObject.Convert(message.OAuthHttpCode));
-            // get token 
-            await taskHttpRequestMessage.ContinueWith(GetToken);
-
+            Task<HttpRequestMessage> taskHttpRequestMessage=null;
+            
+            //check if the request have token 
+            if (message.TargetOAuthRequest != null)
+            {
+                // get httpRequest Message 
+                taskHttpRequestMessage = Task.Run(() => _convertFromCodeHttpToObject.Convert(message.TargetOAuthRequest));
+                // get token 
+                await taskHttpRequestMessage.ContinueWith(GetToken);
+            }
             // send request 
             var httpResponseMessage = await SendRequest(message, taskHttpRequestMessage);
 
@@ -103,42 +107,55 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
             var headers=httpResponseMessage.Headers?.ToDictionary(k => k.Key, k => k.Value.ToString());
             _ = _pushRequestLogic.Push(new Message
             {
-                TargetUrl = message.CallBackUrl,
-                ContentBody = conent,
+                TargetRequest= new Domain.Model.Request.PushRequest 
+                { 
+                    ContentBody=conent,
+                    Url=message.CallBackRequest.Url,
+                    ContentType=message.CallBackRequest.ContentType,
+                    MethodVerb=Domain.Enums.MethodVerb.Post,
+                    ServiceType=message.CallBackRequest.ServiceType,
+                    SoapAction=message.CallBackRequest.SoapAction
+                } ,
+                TargetOAuthRequest=message.CallBackOAuthRequest,
                 IsCallBackMessage = true,
                 Queues = queues,
-                OAuthHttpCode = message.OAuthHttpCodeCallBack,
                 ReferenceNumber = message.ReferenceNumber,
-                TargetVerb = Domain.Enums.TargetVerb.Post,
                 Retry = _queueConfiguration.Value.Values.First().QueueRetry,
                 HttpStatusCode = httpResponseMessage.StatusCode.ToString(),
                 Headers=headers
                 
-            });
+            });;
         }
 
         private async Task<HttpResponseMessage> SendRequest(Message message, Task<HttpRequestMessage> taskHttpRequestMessage)
         {
             using HttpClient client = new HttpClient();
-            using HttpRequestMessage httpRequestMessage = new HttpRequestMessage(new HttpMethod(message.TargetVerb.ToString()), message.TargetUrl);
-            httpRequestMessage.Content = new StringContent(message.ContentBody, Encoding.UTF8, "application/json");
+            using HttpRequestMessage httpRequestMessage = new HttpRequestMessage(new HttpMethod(message.TargetRequest.MethodVerb.ToString()), message.TargetRequest.Url);
+            httpRequestMessage.Content = new StringContent(message.TargetRequest.ContentBody, Encoding.UTF8, message.TargetRequest.ContentType);
             client.DefaultRequestHeaders.Add("ASyncCallHttpStatucCode", message.HttpStatusCode);
             if(message.Headers!=null)
             foreach (var header in message.Headers)
                 httpRequestMessage.Headers.Add(header.Key, header.Value);
-            // wait token 
-            var res = await taskHttpRequestMessage;
+            if (taskHttpRequestMessage != null)
+            {
+                // wait token 
+                var res = await taskHttpRequestMessage;
+            }
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+            if (message.TargetRequest.ServiceType == Domain.Enums.ServiceType.SOAP)
+                client.DefaultRequestHeaders.Add("soapAction", message.TargetRequest.SoapAction);
             return await client.SendAsync(httpRequestMessage);
         }
 
         private async Task GetToken(Task<HttpRequestMessage> taskHttpRequestMessage)
         {
-            HttpRequestMessage httpRequestMessage = await taskHttpRequestMessage;
-            using HttpClient client = new HttpClient();
-            var httpResponseMessage = await client.SendAsync(httpRequestMessage);
-            string content = await httpResponseMessage.Content.ReadAsStringAsync();
-            _token = System.Text.Json.JsonSerializer.Deserialize<AuthModel>(content, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true }).token;
+            HttpRequestMessage httpRequestMessage = await taskHttpRequestMessage;            
+            using (HttpClient client = new HttpClient())
+            {
+                var httpResponseMessage = await client.SendAsync(httpRequestMessage);
+                string content = await httpResponseMessage.Content.ReadAsStringAsync();
+                _token = System.Text.Json.JsonSerializer.Deserialize<AuthModel>(content, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true }).token;
+            }
         }
     }
 }

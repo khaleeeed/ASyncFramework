@@ -52,7 +52,7 @@ namespace Subscriber
             services.AddHealthChecks().AddRabbitMQ((s) => { var app = s.GetService<IOptions<AppConfiguration>>(); return new RabbitMQ.Client.ConnectionFactory() { HostName = app.Value.RabbitHost, Password = app.Value.RabbitPassword, UserName = app.Value.RabbitUserName }; });
            
             services.AddHttpContextAccessor();
-            services.AddTransient<IConvertFromCodeHttpToObject, ConvertFromCodeHttpToObject>();
+            services.AddTransient<IConvertRequestToHttpRequestMessage, ConvertRequestToHttpRequestMessage>();
 
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddTransient<IReferenceNumberService, ReferenceNumberService>();

@@ -37,21 +37,19 @@ namespace ASyncFramework.Application.PushRequestLogic
         }
 
 
-        public Task<Result> Push(PushRequest request)
+        public Task<Result> Push(PushRequestCommand request)
         {
-            QueueConfiguration queueConfiguration = _queueConfiguration[((IEnumerable<string>)request.Queue.Split(",", StringSplitOptions.None)).First()];
+            QueueConfiguration queueConfiguration = _queueConfiguration[((IEnumerable<string>)request.Queues.Split(",", StringSplitOptions.None)).First()];
             
             Message message = new Message()
             {
-                CallBackUrl = request.CallBackUrl,
-                ContentBody = System.Text.Json.JsonSerializer.Serialize(request.ContentBody),
-                OAuthHttpCode = request.OAuthHttpCode,
-                Queues = request.Queue,
+                CallBackOAuthRequest = request.CallBackOAuthRequest,
+                CallBackRequest=request.CallBackRequest,
+                TargetOAuthRequest=request.TargetOAuthRequest,
+                TargetRequest=request.TargetRequest,
+                Queues = request.Queues,
                 Retry = queueConfiguration.QueueRetry,
-                TargetUrl = request.TargetUrl,
-                TargetVerb = request.TargetVerb,
                 ReferenceNumber = _referenceNumber.ReferenceNumber,
-                OAuthHttpCodeCallBack=request.CallBackOAuthHttpCode,
                 Headers=_allHeaders.Headrs
                
                              
