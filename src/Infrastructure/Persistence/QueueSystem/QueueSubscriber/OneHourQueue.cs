@@ -17,7 +17,7 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber
         protected override string QueueName => "OneHourQueue";
 
         private readonly ISubscriberLogic _subscriberLogic;
-        public OneHourQueue(IOptions<AppConfiguration> options, ISubscriberLogic subscriberLogic) : base(options)
+        public OneHourQueue(IRabbitMQPersistent rabbitMQPersistent, ISubscriberLogic subscriberLogic) : base(rabbitMQPersistent)
         {
             _subscriberLogic = subscriberLogic;
         }

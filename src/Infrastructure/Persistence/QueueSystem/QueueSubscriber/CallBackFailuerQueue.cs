@@ -17,9 +17,9 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber
         protected override string QueueName => "CallBackFailuerQueue";
         
         private readonly ISubscriberLogic _subscriberLogic;
-        public CallBackFailuerQueue(IOptions<AppConfiguration> options,ISubscriberLogic subscriberLogic) : base(options)
+        public CallBackFailuerQueue(IRabbitMQPersistent rabbitMQPersistent,ISubscriberLogic subscriberLogic) : base(rabbitMQPersistent)
         {
-            _subscriberLogic = subscriberLogic;
+            _subscriberLogic = subscriberLogic;           
         }
 
         public override bool Process(string content)

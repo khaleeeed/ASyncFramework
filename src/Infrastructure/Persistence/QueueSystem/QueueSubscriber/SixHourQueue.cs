@@ -17,7 +17,7 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber
         protected override string QueueName => "SixHourQueue";
        
         private readonly ISubscriberLogic _subscriberLogic;
-        public SixHourQueue(IOptions<AppConfiguration> options, ISubscriberLogic subscriberLogic) : base(options)
+        public SixHourQueue(IRabbitMQPersistent rabbitMQPersistent, ISubscriberLogic subscriberLogic) : base(rabbitMQPersistent)
         {
             _subscriberLogic = subscriberLogic;
         }

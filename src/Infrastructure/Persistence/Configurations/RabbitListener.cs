@@ -10,30 +10,21 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-
+using RabbitMQ.Client.Exceptions;
 
 namespace ASyncFramework.Infrastructure.Persistence.Configurations
 {
-    public abstract class RabbitListener : IHostedService ,IDisposable
+    public abstract class RabbitListener :  IHostedService ,IDisposable
     {
         System.Timers.Timer _timer;
-        private readonly ConnectionFactory _factory;
-        private  IConnection _connection;
-        private IModel _channel;
-        protected IConnection Connection => _connection ??= _factory.CreateConnection();
-        protected IModel Channel => _channel ??= Connection.CreateModel();
+        protected IRabbitMQPersistent _RabbitMQPersistent;
         protected abstract string ExchangeName { get; }
         protected abstract string ExchangeType { get; }
         protected abstract Dictionary<string, object> ExchangeArgu { get; }
         protected abstract string QueueName { get; }
-        public RabbitListener(IOptions<AppConfiguration> options)
+        public RabbitListener(IRabbitMQPersistent rabbitMQPersistent)
         {
-            _factory = new ConnectionFactory()
-            {
-                HostName = options.Value.RabbitHost,
-                UserName = options.Value.RabbitUserName,
-                Password = options.Value.RabbitPassword,
-            };
+            _RabbitMQPersistent = rabbitMQPersistent;
             
         }
         public Task StartAsync(CancellationToken cancellationToken)
@@ -60,7 +51,7 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
         }
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _connection.Close();
+            StartAsync(cancellationToken);
             return Task.CompletedTask;
         }
         private void _timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -71,11 +62,11 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
         public abstract bool Process(string content);
         public void Register(string exchange, string queue, IDictionary<string, object> argu, string exchangeType)
         {
-            Channel.ExchangeDeclare(exchange, exchangeType, true, false, argu);
-            Channel.QueueDeclare(queue, true, false, false);
-            Channel.QueueBind(queue, exchange, queue);
+            _RabbitMQPersistent.Channel.ExchangeDeclare(exchange, exchangeType, true, false, argu);
+            _RabbitMQPersistent.Channel.QueueDeclare(queue, true, false, false);
+            _RabbitMQPersistent.Channel.QueueBind(queue, exchange, queue);
 
-            var consumer = new EventingBasicConsumer(_channel);
+            var consumer = new EventingBasicConsumer(_RabbitMQPersistent.Channel);
             consumer.Received += (model, ea) =>
             {
                 var body = ea.Body;
@@ -83,20 +74,19 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
                 var result = Process(message);
                 if (result)
                 {
-                    _channel.BasicAck(ea.DeliveryTag, false);
+                    _RabbitMQPersistent.Channel.BasicAck(ea.DeliveryTag, false);
                 }
             };
-            _channel.BasicConsume(queue: queue, consumer: consumer);
+            _RabbitMQPersistent.Channel.BasicConsume(queue: queue, consumer: consumer);
         }
         public void DeRegister()
         {
-            _connection.Close();
+            _RabbitMQPersistent.Connection.Close();
         }
 
         public void Dispose()
         {
-            _channel?.Dispose();
-            _channel = null;
+            _RabbitMQPersistent.Dispose();
         }
     }
 }

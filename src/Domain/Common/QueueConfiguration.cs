@@ -11,5 +11,6 @@ namespace ASyncFramework.Domain.Common
         public int Dealy { get; set; }
         public string QueueName { get; set; }
         public string ExhangeName { get; set; }
+        public bool IsAutoMapping { get; set; }
     }
 }

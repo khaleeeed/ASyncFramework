@@ -1,5 +1,6 @@
 ﻿using ASyncFramework.Domain.Common;
 using ASyncFramework.Domain.Interface;
+using ASyncFramework.Infrastructure.Persistence.Configurations;
 using ASyncFramework.Infrastructure.Persistence.QueueSystem;
 using ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +15,7 @@ namespace ASyncFramework.Infrastructure
         {
             services.Configure<AppConfiguration>(options => configuration.GetSection("RabbitMQConfiguration").Bind(options));
             services.Configure<Dictionary<string, QueueConfiguration>>(options => configuration.GetSection("QueueConfiguration").Bind(options));
+            services.AddTransient<IRabbitMQPersistent, RabbitMQPersistent>();
             services.AddSingleton<IRabbitProducers, RabbitProducers>();
         }
     }

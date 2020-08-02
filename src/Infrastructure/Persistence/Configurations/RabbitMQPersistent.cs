@@ -12,7 +12,7 @@ using System.Timers;
 
 namespace ASyncFramework.Infrastructure.Persistence.Configurations
 {
-    public class RabbitMQPersistent : IDisposable
+    public class RabbitMQPersistent : IRabbitMQPersistent
     {
         private System.Timers.Timer _timer;
         private readonly ConnectionFactory _factory;
@@ -36,6 +36,7 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
                 UserName = options.Value.RabbitUserName,
                 Password = options.Value.RabbitPassword,
             };
+            
 
         }
 
@@ -46,6 +47,7 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
                 _connection.ConnectionShutdown += OnConnectionShutdown;
                 _connection.CallbackException += OnCallbackException;
                 _connection.ConnectionBlocked += OnConnectionBlocked;
+                
             }
         }
 
@@ -53,34 +55,65 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
         {
             // log 
 
-            // dispose connection 
-            DisposeConnection();
-
             // retry connect 
-            _=Connection;
+            if (_timer==null)
+            {
+                _timer = new System.Timers.Timer();
+                _timer.Interval = 600000;
+                _timer.Elapsed += RetryToConnect; ;
+                _timer.Start();
+            }
 
-        }
+        }    
 
         private void OnCallbackException(object sender, CallbackExceptionEventArgs e)
         {
             // log 
 
-            // dispose connection 
-            DisposeConnection();
-
             // retry connect 
-            _ = Connection;
+            if (_timer == null)
+            {
+                _timer = new System.Timers.Timer();
+                _timer.Interval = 600000;
+                _timer.Elapsed += RetryToConnect; ;
+                _timer.Start();
+            }
         }
 
         private void OnConnectionShutdown(object sender, ShutdownEventArgs e)
         {
             // log 
 
+
+            // retry connect 
+            if (_timer == null)
+            {
+                _timer = new System.Timers.Timer();
+                _timer.Interval = 600000;
+                _timer.Elapsed += RetryToConnect; ;
+                _timer.Start();
+            }
+        }
+        private void RetryToConnect(object sender, ElapsedEventArgs e)
+        {
             // dispose connection 
             DisposeConnection();
 
-            // retry connect 
-            _ = Connection;
+            try
+            {
+                _connection = _factory.CreateConnection();
+
+            }
+            catch (Exception ex)
+            {
+                // log 
+            }
+            if (IsConnected)
+            {
+                _timer?.Dispose();
+                _timer = null;
+                Connect();
+            }
         }
 
         private void DisposeConnection()

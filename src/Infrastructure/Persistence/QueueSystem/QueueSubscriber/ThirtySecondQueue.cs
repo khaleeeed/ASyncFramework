@@ -17,7 +17,7 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber
         protected override string QueueName => "ThirtySecondQueue";
 
         private readonly ISubscriberLogic _subscriberLogic;
-        public ThirtySecondQueue(IOptions<AppConfiguration> options, ISubscriberLogic subscriberLogic) : base(options)
+        public ThirtySecondQueue(IRabbitMQPersistent rabbitMQPersistent, ISubscriberLogic subscriberLogic) : base(rabbitMQPersistent)
         {
             _subscriberLogic = subscriberLogic;
         }
