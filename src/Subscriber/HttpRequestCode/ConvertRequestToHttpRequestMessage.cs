@@ -16,10 +16,12 @@ namespace Subscriber.HttpRequestCode
             {
                 httpRequestMessage.Headers.Add("soapAction", request.SoapAction);
             }
-            foreach (var header in request.Headers)
-            {
-                httpRequestMessage.Headers.Add(header.Key, header.Value);
-            }
+
+            if (request.Headers != null)
+                foreach (var header in request.Headers)
+                {
+                    httpRequestMessage.Headers.Add(header.Key, header.Value);
+                }
            
             return httpRequestMessage;
         }

@@ -14,11 +14,12 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
 {
     public class RabbitMQPersistent : IRabbitMQPersistent
     {
+        private bool IsFailureConnection;
         private System.Timers.Timer _timer;
         private readonly ConnectionFactory _factory;
         private IConnection _connection;
         private IModel _channel;
-        public IConnection Connection { get { _connection ??= _factory.CreateConnection(); Connect(); return _connection; } }
+        public IConnection Connection { get { if (_connection != null) { return _connection; } _connection = _factory.CreateConnection(); Connect(); return _connection; } }
         public IModel Channel => _channel ??= Connection.CreateModel();
         public bool IsConnected
         {
@@ -35,10 +36,10 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
                 HostName = options.Value.RabbitHost,
                 UserName = options.Value.RabbitUserName,
                 Password = options.Value.RabbitPassword,
-            };
-            
-
+            };            
         }
+
+        public event Func<CancellationToken,Task> RetryToRegisterChannelEvent;
 
         public void Connect()
         {
@@ -47,7 +48,9 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
                 _connection.ConnectionShutdown += OnConnectionShutdown;
                 _connection.CallbackException += OnCallbackException;
                 _connection.ConnectionBlocked += OnConnectionBlocked;
-                
+                if (IsFailureConnection)
+                    RetryToRegisterChannelEvent?.Invoke(CancellationToken.None);
+                IsFailureConnection = false;
             }
         }
 
@@ -63,7 +66,7 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
                 _timer.Elapsed += RetryToConnect; ;
                 _timer.Start();
             }
-
+            IsFailureConnection = true;
         }    
 
         private void OnCallbackException(object sender, CallbackExceptionEventArgs e)
@@ -78,6 +81,7 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
                 _timer.Elapsed += RetryToConnect; ;
                 _timer.Start();
             }
+            IsFailureConnection = true;
         }
 
         private void OnConnectionShutdown(object sender, ShutdownEventArgs e)
@@ -93,6 +97,7 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
                 _timer.Elapsed += RetryToConnect; ;
                 _timer.Start();
             }
+            IsFailureConnection = true;
         }
         private void RetryToConnect(object sender, ElapsedEventArgs e)
         {

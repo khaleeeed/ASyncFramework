@@ -26,8 +26,7 @@ namespace ASyncFramework.Application.QueryQueueDescription
         }
 
         public Task<List<QueueDescription>> Handle(GetDescriptionQuery  request, CancellationToken cancellationToken)
-        {
-           
+        {           
             return Task.FromResult(_queueConfiguration.Where(x=>Regex.IsMatch(x.Key, @"^\d+$")).Select(x => new QueueDescription { ID = x.Key, Name=x.Value.QueueName,Delay=TimeSpan.FromSeconds(x.Value.Dealy/1000).ToString() }).ToList());
         }
     }

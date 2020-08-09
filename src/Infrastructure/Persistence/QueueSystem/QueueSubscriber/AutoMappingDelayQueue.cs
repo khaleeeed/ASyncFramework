@@ -5,6 +5,7 @@ using ASyncFramework.Infrastructure.Persistence.Configurations;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber
 {
@@ -22,10 +23,10 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber
             _subscriberLogic = subscriberLogic;
         }
 
-        public override bool Process(string content)
+        public override async Task<bool> Process(string content)
         {
             var message = System.Text.Json.JsonSerializer.Deserialize<Message>(content);
-            _subscriberLogic.Subscribe(message);
+            await _subscriberLogic.Subscribe(message);
             return true;
         }
     }

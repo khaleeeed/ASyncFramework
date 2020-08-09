@@ -19,6 +19,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Subscriber", "src\Subscribe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InfrastructureTests", "src\InfrastructureTests\InfrastructureTests.csproj", "{B80B13FF-6C4E-4AB0-BA17-D298F7F2B087}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApplicationTests", "src\ApplicationTests\ApplicationTests.csproj", "{6D2F7121-BEB3-4DB1-9881-1DF8AE91BB23}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApplicationTests.IntegrationTests", "src\ApplicationTests.IntegrationTests\ApplicationTests.IntegrationTests.csproj", "{FBA0DE02-CE7E-47AB-A89A-4C8B8A327C2E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +53,14 @@ Global
 		{B80B13FF-6C4E-4AB0-BA17-D298F7F2B087}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B80B13FF-6C4E-4AB0-BA17-D298F7F2B087}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B80B13FF-6C4E-4AB0-BA17-D298F7F2B087}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D2F7121-BEB3-4DB1-9881-1DF8AE91BB23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D2F7121-BEB3-4DB1-9881-1DF8AE91BB23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D2F7121-BEB3-4DB1-9881-1DF8AE91BB23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D2F7121-BEB3-4DB1-9881-1DF8AE91BB23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBA0DE02-CE7E-47AB-A89A-4C8B8A327C2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBA0DE02-CE7E-47AB-A89A-4C8B8A327C2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBA0DE02-CE7E-47AB-A89A-4C8B8A327C2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBA0DE02-CE7E-47AB-A89A-4C8B8A327C2E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,6 +72,8 @@ Global
 		{F83601C9-405E-4A76-816F-11101206872C} = {6ED356A7-8B47-4613-AD01-C85CF28491BD}
 		{2EA02F70-4F11-47AD-8693-7278A856400F} = {6ED356A7-8B47-4613-AD01-C85CF28491BD}
 		{B80B13FF-6C4E-4AB0-BA17-D298F7F2B087} = {664D406C-2F83-48F0-BFC3-408D5CB53C65}
+		{6D2F7121-BEB3-4DB1-9881-1DF8AE91BB23} = {664D406C-2F83-48F0-BFC3-408D5CB53C65}
+		{FBA0DE02-CE7E-47AB-A89A-4C8B8A327C2E} = {664D406C-2F83-48F0-BFC3-408D5CB53C65}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3CB609D9-5D54-4C11-A371-DAAC8B74E430}

@@ -1,4 +1,5 @@
-﻿using ASyncFramework.Domain.Common;
+﻿using ASyncFramework.Infrastructure.Persistence.Configurations;
+using ASyncFramework.Domain.Common;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -18,8 +19,8 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations.Tests
 
         public RabbitMQPersistentTests()
         {
-            options.Setup(x => x.Value).Returns(new AppConfiguration 
-            { 
+            options.Setup(x => x.Value).Returns(new AppConfiguration
+            {
                 RabbitHost = "localhost",
                 RabbitPassword = "guest",
                 RabbitUserName = "guest"
@@ -29,9 +30,16 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations.Tests
 
         [Test()]
         public void RabbitMQPersistentTest()
-        {       
-            var res= rabbitMQPersistent.Object.Connection;
+        {
+            Assert.IsFalse(rabbitMQPersistent.Object.IsConnected);
         }
 
+        [Test()]
+        public void DisposeTest()
+        {
+            rabbitMQPersistent.Object.Dispose();
+            rabbitMQPersistent.Object.Dispose();
+            rabbitMQPersistent.Object.Dispose();
+        }
     }
 }

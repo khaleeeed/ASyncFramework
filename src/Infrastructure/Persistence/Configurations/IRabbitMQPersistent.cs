@@ -1,5 +1,7 @@
 ﻿using RabbitMQ.Client;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ASyncFramework.Infrastructure.Persistence.Configurations
 {
@@ -8,5 +10,6 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
         IModel Channel { get; }
         IConnection Connection { get; }
         bool IsConnected { get; }
+        event Func<CancellationToken,Task> RetryToRegisterChannelEvent;
     }
 }

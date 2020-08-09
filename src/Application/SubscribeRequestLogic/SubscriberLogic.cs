@@ -1,4 +1,5 @@
-﻿using ASyncFramework.Application.PushRequestLogic;
+﻿using ASyncFramework.Application.Common.Models;
+using ASyncFramework.Application.PushRequestLogic;
 using ASyncFramework.Domain.Common;
 using ASyncFramework.Domain.Interface;
 using ASyncFramework.Domain.Model;
@@ -30,18 +31,18 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
         {
 
             System.Net.ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(delegate { return true; });
-            Task<HttpRequestMessage> taskHttpRequestMessage=null;
+            Task<Task> taskGetToken = null;
             
             //check if the request have token 
             if (message.TargetOAuthRequest != null)
             {
                 // get httpRequest Message 
-                taskHttpRequestMessage = Task.Run(() => _convertFromCodeHttpToObject.Convert(message.TargetOAuthRequest));
+                var taskHttpRequestMessage = Task.Run(() => _convertFromCodeHttpToObject.Convert(message.TargetOAuthRequest));
                 // get token 
-                await taskHttpRequestMessage.ContinueWith(GetToken);
+                taskGetToken=taskHttpRequestMessage.ContinueWith(GetToken);
             }
             // send request 
-            var httpResponseMessage = await SendRequest(message, taskHttpRequestMessage);
+            var httpResponseMessage = await SendRequest(message, taskGetToken);
 
             // if call Back message 
             if (message.IsCallBackMessage)
@@ -104,7 +105,7 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
         {
             var queues = _queueConfiguration.Value.Keys.Select(x => x).Aggregate((x, y) => $"{x},{y}");
             var conent = await httpResponseMessage.Content?.ReadAsStringAsync();
-            var headers=httpResponseMessage.Headers?.ToDictionary(k => k.Key, k => k.Value.ToString());
+            var headers=httpResponseMessage.Headers?.ToDictionary(k => k.Key, k => k.Value.Aggregate((x,y)=>x+y));
             _ = _pushRequestLogic.Push(new Message
             {
                 TargetRequest= new Domain.Model.Request.PushRequest 
@@ -124,23 +125,26 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
                 HttpStatusCode = httpResponseMessage.StatusCode.ToString(),
                 Headers=headers
                 
-            });;
+            });
         }
 
-        private async Task<HttpResponseMessage> SendRequest(Message message, Task<HttpRequestMessage> taskHttpRequestMessage)
+        private async Task<HttpResponseMessage> SendRequest(Message message, Task<Task> taskGetToken)
         {
             using HttpClient client = new HttpClient();
             using HttpRequestMessage httpRequestMessage = new HttpRequestMessage(new HttpMethod(message.TargetRequest.MethodVerb.ToString()), message.TargetRequest.Url);
-            httpRequestMessage.Content = new StringContent(message.TargetRequest.ContentBody, Encoding.UTF8, message.TargetRequest.ContentType);
+            httpRequestMessage.Content = message.TargetRequest.ContentBody == null ? null : new StringContent(message.TargetRequest.ContentBody, Encoding.UTF8, message.TargetRequest.ContentType);
             client.DefaultRequestHeaders.Add("ASyncCallHttpStatucCode", message.HttpStatusCode);
-            if(message.Headers!=null)
-            foreach (var header in message.Headers)
-                httpRequestMessage.Headers.Add(header.Key, header.Value);
-            if (taskHttpRequestMessage != null)
-            {
-                // wait token 
-                var res = await taskHttpRequestMessage;
-            }
+            if (message.Headers != null)
+                foreach (var header in message.Headers)
+                {
+                    if (!UnregisterHeader.UnregisteredHeaders.Contains(header.Key) && !httpRequestMessage.Headers.Contains(header.Key))
+                        httpRequestMessage.Headers.Add(header.Key, header.Value);
+                }
+
+            // wait token 
+            if (taskGetToken != null)
+                await await taskGetToken;
+            
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             if (message.TargetRequest.ServiceType == Domain.Enums.ServiceType.SOAP)
                 client.DefaultRequestHeaders.Add("soapAction", message.TargetRequest.SoapAction);
