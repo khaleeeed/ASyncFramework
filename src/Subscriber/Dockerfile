@@ -7,10 +7,13 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
-COPY ["Subscriber/Subscriber.csproj", "Subscriber/"]
-RUN dotnet restore "Subscriber/Subscriber.csproj"
+COPY ["src/Subscriber/Subscriber.csproj", "src/Subscriber/"]
+COPY ["src/Application/Application.csproj", "src/Application/"]
+COPY ["src/Domain/Domain.csproj", "src/Domain/"]
+COPY ["src/Infrastructure/Infrastructure.csproj", "src/Infrastructure/"]
+RUN dotnet restore "src/Subscriber/Subscriber.csproj"
 COPY . .
-WORKDIR "/src/Subscriber"
+WORKDIR "/src/src/Subscriber"
 RUN dotnet build "Subscriber.csproj" -c Release -o /app/build
 
 FROM build AS publish
