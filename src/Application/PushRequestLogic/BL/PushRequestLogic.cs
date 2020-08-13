@@ -7,12 +7,15 @@
 using ASyncFramework.Application.Common.Interfaces;
 using ASyncFramework.Application.Common.Models;
 using ASyncFramework.Domain.Common;
+using ASyncFramework.Domain.Enums;
 using ASyncFramework.Domain.Interface;
 using ASyncFramework.Domain.Model;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace ASyncFramework.Application.PushRequestLogic
@@ -40,24 +43,23 @@ namespace ASyncFramework.Application.PushRequestLogic
         public Task<Result> Push(PushRequestCommand request)
         {
             QueueConfiguration queueConfiguration = _queueConfiguration[((IEnumerable<string>)request.Queues.Split(",", StringSplitOptions.None)).First()];
-            
+
             Message message = new Message()
             {
                 CallBackOAuthRequest = request.CallBackOAuthRequest,
-                CallBackRequest=request.CallBackRequest,
-                TargetOAuthRequest=request.TargetOAuthRequest,
-                TargetRequest=request.TargetRequest,
+                CallBackRequest = request.CallBackRequest,
+                TargetOAuthRequest = request.TargetOAuthRequest,
+                TargetRequest = request.TargetRequest,
                 Queues = request.Queues,
                 Retry = queueConfiguration.QueueRetry,
                 ReferenceNumber = _referenceNumber.ReferenceNumber,
-                Headers=_allHeaders.Headrs
-               
-                             
+                Headers = _allHeaders.Headrs
+
+
             };
-            using (_rabbitProducers)
-            {
+            using (_rabbitProducers)            
                 _rabbitProducers.PushMessage(message, queueConfiguration);
-            }
+            
             return Task.FromResult(new Result(true, null)
             {
                 ReferenceNumber = _referenceNumber.ReferenceNumber
@@ -69,6 +71,7 @@ namespace ASyncFramework.Application.PushRequestLogic
             QueueConfiguration queueConfiguration = _queueConfiguration[((IEnumerable<string>)message.Queues.Split(",")).First()];
             using (_rabbitProducers)
                 _rabbitProducers.PushMessage(message, queueConfiguration);
+
             return Task.FromResult(new Result(true, null)
             {
                 ReferenceNumber = message.ReferenceNumber

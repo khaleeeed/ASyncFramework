@@ -73,7 +73,7 @@ namespace Publisher
             app.UseOpenApi();
             app.UseSwaggerUi3();
             app.UseRouting();
-
+            
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

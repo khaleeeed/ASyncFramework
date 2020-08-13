@@ -1,8 +1,10 @@
 ﻿using ASyncFramework.Application.Common.Models;
 using ASyncFramework.Application.PushRequestLogic;
 using ASyncFramework.Domain.Common;
+using ASyncFramework.Domain.Enums;
 using ASyncFramework.Domain.Interface;
 using ASyncFramework.Domain.Model;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +21,10 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
         private readonly IConvertRequestToHttpRequestMessage _convertFromCodeHttpToObject;
         private readonly IPushRequestLogic _pushRequestLogic;
         private readonly IOptions<Dictionary<string, QueueConfiguration>> _queueConfiguration;
-
-        public SubscriberLogic(IConvertRequestToHttpRequestMessage convertFromCodeHttpToObject, IPushRequestLogic pushRequestLogic, IOptions<Dictionary<string, QueueConfiguration>> queueConfiguration)
+        private readonly IElkLogger<SubscriberLogic> _logger;
+        public SubscriberLogic(IElkLogger<SubscriberLogic> logger,IConvertRequestToHttpRequestMessage convertFromCodeHttpToObject, IPushRequestLogic pushRequestLogic, IOptions<Dictionary<string, QueueConfiguration>> queueConfiguration)
         {
+            _logger = logger;
             _convertFromCodeHttpToObject = convertFromCodeHttpToObject;
             _pushRequestLogic = pushRequestLogic;
             _queueConfiguration = queueConfiguration;
@@ -29,7 +32,6 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
 
         public async Task Subscribe(Message message)
         {
-
             System.Net.ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(delegate { return true; });
             Task<Task> taskGetToken = null;
             
@@ -46,17 +48,22 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
 
             // if call Back message 
             if (message.IsCallBackMessage)
-            {
+            {               
                 // if call back message success stop function 
                 if (httpResponseMessage.IsSuccessStatusCode)
                 {
+                    _logger.LogFinish(MessageLifeCycle.FinishInSuccessed,message.ReferenceNumber); 
                     return;
                 }
                 // if call back message not success retry 
-                // retry 
-                _ = Retry(message,true);
-            }
+                // retry and return
+                _ = Retry(message, true);
 
+                _logger.LogRetry(MessageLifeCycle.RetryCallBack, message.ReferenceNumber, message.Queues.Split(',').First(), message.Retry);
+
+                return;
+            }
+           
             // success or user error push message to queue for call  callbackService 
             if (httpResponseMessage.IsSuccessStatusCode || httpResponseMessage.StatusCode < System.Net.HttpStatusCode.InternalServerError)
             {
@@ -69,18 +76,24 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
             {
                 // retry 
                 _ = Retry(message);
+
+                _logger.LogRetry(MessageLifeCycle.RetryTarget, message.ReferenceNumber, message.Queues.Split(',').First(), message.Retry);
             }
         }
 
         private Task Retry(Message message,bool isMessageCallBack=false)
         {
+
             // if there no retry in queue push to next long queue 
             if (message.Retry <= 0)
             {
                 var Queues = message.Queues.Split(',');
+
                 // messageCallBack push message to call back fauiler queues 
                 if (Queues.Length < 2 && isMessageCallBack==true)
                 {
+                    _logger.LogFinish(MessageLifeCycle.FinishInCallBackFailure, message.ReferenceNumber);
+
                     var queueConfig= _queueConfiguration.Value["CallBackFailuer"];
                     message.Queues = queueConfig.QueueName;
                     message.Retry = queueConfig.QueueRetry;
@@ -90,20 +103,21 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
                 // check if there next long queue else request will lost 
                 if (Queues.Length < 2)
                 {
+                    _logger.LogFinish(MessageLifeCycle.FinishInTarget, message.ReferenceNumber);
                     return Task.CompletedTask;
                 }
                 message.Queues = Queues.Skip(1).Aggregate((x, y) => $"{x},{y}");
                 message.Retry = _queueConfiguration.Value[Queues.Skip(1).FirstOrDefault()].QueueRetry + 1;
             }
             message.Retry -= 1;
-            // retry
+                 // retry
             _ = _pushRequestLogic.Push(message);
             return Task.CompletedTask;
         }
 
         private async Task PushForCallBackApi(Message message, HttpResponseMessage httpResponseMessage)
         {
-            var queues = _queueConfiguration.Value.Keys.Select(x => x).Aggregate((x, y) => $"{x},{y}");
+            var queues = _queueConfiguration.Value.Keys.Where(x=>x!="CallBackFailuer").Aggregate((x, y) => $"{x},{y}");
             var conent = await httpResponseMessage.Content?.ReadAsStringAsync();
             var headers=httpResponseMessage.Headers?.ToDictionary(k => k.Key, k => k.Value.Aggregate((x,y)=>x+y));
             _ = _pushRequestLogic.Push(new Message
@@ -113,10 +127,10 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
                     ContentBody=conent,
                     Url=message.CallBackRequest.Url,
                     ContentType=message.CallBackRequest.ContentType,
-                    MethodVerb=Domain.Enums.MethodVerb.Post,
+                    MethodVerb= MethodVerb.Post,
                     ServiceType=message.CallBackRequest.ServiceType,
                     SoapAction=message.CallBackRequest.SoapAction
-                } ,
+                },
                 TargetOAuthRequest=message.CallBackOAuthRequest,
                 IsCallBackMessage = true,
                 Queues = queues,
@@ -144,11 +158,14 @@ namespace ASyncFramework.Application.SubscribeRequestLogic
             // wait token 
             if (taskGetToken != null)
                 await await taskGetToken;
-            
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
-            if (message.TargetRequest.ServiceType == Domain.Enums.ServiceType.SOAP)
+            if (message.TargetRequest.ServiceType == ServiceType.SOAP)
                 client.DefaultRequestHeaders.Add("soapAction", message.TargetRequest.SoapAction);
-            return await client.SendAsync(httpRequestMessage);
+            var httpResponseMessage= await client.SendAsync(httpRequestMessage);
+
+            _logger.SendRequest(message.IsCallBackMessage,message.ReferenceNumber, _token, $"{httpResponseMessage.StatusCode}", await httpResponseMessage.Content?.ReadAsStringAsync());
+
+            return httpResponseMessage;
         }
 
         private async Task GetToken(Task<HttpRequestMessage> taskHttpRequestMessage)

@@ -36,7 +36,6 @@ namespace ASyncFramework.Application.PushRequestLogic
 
         public Request TargetOAuthRequest { get; set; }
         public PushRequest TargetRequest { get; set; }
-
         public CallBackRequest CallBackRequest { get; set; }
         public Request CallBackOAuthRequest { get; set; }
     }

@@ -3,6 +3,7 @@ using ASyncFramework.Domain.Interface;
 using ASyncFramework.Infrastructure.Persistence.Configurations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -17,12 +18,12 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber
     {
         private readonly List<AutoMappingDelayQueue> _autoMappingDelayQueues = new List<AutoMappingDelayQueue>();
 
-        public RunTimeQueue(IServiceProvider serviceProvider,IOptions<Dictionary<string,QueueConfiguration>> queueConfigurations)
+        public RunTimeQueue(IServiceProvider serviceProvider,IOptions<Dictionary<string,QueueConfiguration>> queueConfigurations,IElkLogger<RabbitListener>logger)
         {
              var runTimeQueue = queueConfigurations.Value.Where(x => x.Value.IsAutoMapping).Select(x => x.Value);
             foreach (var queue in runTimeQueue)
             {
-                _autoMappingDelayQueues.Add(new AutoMappingDelayQueue(serviceProvider.GetService<IRabbitMQPersistent>(), serviceProvider.GetService<ISubscriberLogic>(), queue));
+                _autoMappingDelayQueues.Add(new AutoMappingDelayQueue(serviceProvider.GetService<IRabbitMQPersistent>(), serviceProvider.GetService<ISubscriberLogic>(), queue,logger));
             }
         }
 

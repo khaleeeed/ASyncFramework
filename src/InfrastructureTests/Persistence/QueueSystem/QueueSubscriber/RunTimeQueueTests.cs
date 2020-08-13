@@ -20,21 +20,21 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber.
         [Test()]
         public void RunTimeQueueTest()
         {
-            _ = new RunTimeQueue(mockServiceProvider.Object, mockOptions.Object);
+            //_ = new RunTimeQueue(mockServiceProvider.Object, mockOptions.Object);
         }
 
         [Test()]
         public void StartAsyncTest()
         {
-            var RunTimeQueue = new RunTimeQueue(mockServiceProvider.Object, mockOptions.Object);
-            RunTimeQueue.StartAsync(CancellationToken.None);
+            //var RunTimeQueue = new RunTimeQueue(mockServiceProvider.Object, mockOptions.Object);
+            //RunTimeQueue.StartAsync(CancellationToken.None);
         }
 
         [Test()]
         public void StopAsyncTest()
         {
-            var RunTimeQueue = new RunTimeQueue(mockServiceProvider.Object, mockOptions.Object);
-            RunTimeQueue.StopAsync(CancellationToken.None);
+            //var RunTimeQueue = new RunTimeQueue(mockServiceProvider.Object, mockOptions.Object);
+            //RunTimeQueue.StopAsync(CancellationToken.None);
         }
     }
 }

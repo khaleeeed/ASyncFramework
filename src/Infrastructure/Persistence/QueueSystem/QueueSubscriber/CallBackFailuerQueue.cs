@@ -2,6 +2,7 @@
 using ASyncFramework.Domain.Interface;
 using ASyncFramework.Domain.Model;
 using ASyncFramework.Infrastructure.Persistence.Configurations;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -18,14 +19,14 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber
         protected override string QueueName => "CallBackFailuerQueue";
         
         private readonly ISubscriberLogic _subscriberLogic;
-        public CallBackFailuerQueue(IRabbitMQPersistent rabbitMQPersistent,ISubscriberLogic subscriberLogic) : base(rabbitMQPersistent)
+        public CallBackFailuerQueue(IRabbitMQPersistent rabbitMQPersistent,ISubscriberLogic subscriberLogic,IElkLogger<RabbitListener>logger) : base(rabbitMQPersistent,logger)
         {
             _subscriberLogic = subscriberLogic;           
         }
 
         public override async Task<bool> Process(string content)
         {
-            var message = System.Text.Json.JsonSerializer.Deserialize<Message>(content); 
+            var message = Newtonsoft.Json.JsonConvert.DeserializeObject<Message>(content); 
             await _subscriberLogic.Subscribe(message);
             return true;
         }

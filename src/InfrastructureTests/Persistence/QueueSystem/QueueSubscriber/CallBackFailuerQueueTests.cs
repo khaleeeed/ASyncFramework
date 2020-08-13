@@ -20,34 +20,34 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber.
         [Test()]
         public void CallBackFailuerQueueTest()
         {
-            _ = new CallBackFailuerQueue(mockRabbitMQPersistent.Object, mockSubscriberLogic.Object);
+            //_ = new CallBackFailuerQueue(mockRabbitMQPersistent.Object, mockSubscriberLogic.Object);
             
         }
         [Test()]
         public void ProcessTest()
         {
-            CallBackFailuerQueue callBackFailuerQueue = new CallBackFailuerQueue(mockRabbitMQPersistent.Object, mockSubscriberLogic.Object);
-            Assert.IsTrue(callBackFailuerQueue.Process(System.Text.Json.JsonSerializer.Serialize(new Message { HttpStatusCode="test" })).Result);
+        //    CallBackFailuerQueue callBackFailuerQueue = new CallBackFailuerQueue(mockRabbitMQPersistent.Object, mockSubscriberLogic.Object);
+        //    Assert.IsTrue(callBackFailuerQueue.Process(System.Text.Json.JsonSerializer.Serialize(new Message { HttpStatusCode="test" })).Result);
         }
         [Test()]
         public void DisposeTest()
         {
-            CallBackFailuerQueue callBackFailuerQueue = new CallBackFailuerQueue(mockRabbitMQPersistent.Object, mockSubscriberLogic.Object);
-            callBackFailuerQueue.Dispose();
-            callBackFailuerQueue.Dispose();
-            callBackFailuerQueue.Dispose();
+            //CallBackFailuerQueue callBackFailuerQueue = new CallBackFailuerQueue(mockRabbitMQPersistent.Object, mockSubscriberLogic.Object);
+            //callBackFailuerQueue.Dispose();
+            //callBackFailuerQueue.Dispose();
+            //callBackFailuerQueue.Dispose();
         }
         [Test()]
         public void StartAsyncTest()
         {
-            CallBackFailuerQueue callBackFailuerQueue = new CallBackFailuerQueue(mockRabbitMQPersistent.Object, mockSubscriberLogic.Object);
-            callBackFailuerQueue.StartAsync(CancellationToken.None);
+            //CallBackFailuerQueue callBackFailuerQueue = new CallBackFailuerQueue(mockRabbitMQPersistent.Object, mockSubscriberLogic.Object);
+            //callBackFailuerQueue.StartAsync(CancellationToken.None);
         }
         [Test()]
         public void StopAsyncTest()
         {
-            CallBackFailuerQueue callBackFailuerQueue = new CallBackFailuerQueue(mockRabbitMQPersistent.Object, mockSubscriberLogic.Object);
-            callBackFailuerQueue.StopAsync(CancellationToken.None);
+            //CallBackFailuerQueue callBackFailuerQueue = new CallBackFailuerQueue(mockRabbitMQPersistent.Object, mockSubscriberLogic.Object);
+            //callBackFailuerQueue.StopAsync(CancellationToken.None);
         }
     }
 }

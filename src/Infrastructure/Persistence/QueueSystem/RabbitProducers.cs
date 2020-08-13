@@ -14,9 +14,11 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem
     public class RabbitProducers : IRabbitProducers
     {
         protected IRabbitMQPersistent  _RabbitMQPersistent;
-        public RabbitProducers(IRabbitMQPersistent rabbitMQPersistent)
+        private IElkLogger<RabbitProducers> _logger;
+        public RabbitProducers(IRabbitMQPersistent rabbitMQPersistent,IElkLogger<RabbitProducers> logger)
         {
             _RabbitMQPersistent = rabbitMQPersistent;
+            _logger = logger;
         }
 
         public virtual void PushMessage(Message message,QueueConfiguration queueConfiguration)
@@ -30,10 +32,13 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem
             properties.DeliveryMode = 2;
             headers.Add("x-delay", queueConfiguration.Dealy);
             properties.Headers = headers;
+
             _RabbitMQPersistent.Channel.BasicPublish(exchange: queueConfiguration.ExhangeName,
                                  routingKey: queueConfiguration.QueueName,
                                  basicProperties: properties,
                                  body: body);
+
+            _logger.LogPublishing(message);
         }
 
         public void Dispose()

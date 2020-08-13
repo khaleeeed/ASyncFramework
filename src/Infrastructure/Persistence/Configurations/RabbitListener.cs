@@ -3,7 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ASyncFramework.Domain.Enums;
+using ASyncFramework.Domain.Interface;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -11,14 +16,16 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
 {
     public abstract class RabbitListener :  IHostedService ,IDisposable
     {
+        private IElkLogger<RabbitListener> _logger;
         System.Timers.Timer _timer;
         protected IRabbitMQPersistent _RabbitMQPersistent;
         protected abstract string ExchangeName { get; }
         protected abstract string ExchangeType { get; }
         protected abstract Dictionary<string, object> ExchangeArgu { get; }
         protected abstract string QueueName { get; }
-        public RabbitListener(IRabbitMQPersistent rabbitMQPersistent)
+        public RabbitListener(IRabbitMQPersistent rabbitMQPersistent,IElkLogger<RabbitListener> logger)
         {
+            _logger = logger;
             _RabbitMQPersistent = rabbitMQPersistent;
             _RabbitMQPersistent.RetryToRegisterChannelEvent += StartAsync;            
         }
@@ -33,8 +40,9 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
             }
             catch (Exception ex)
             {
-                // log exc
-
+                _logger.LogError(ex, "failure when try register {ExchangeName} {QueueName}",
+                    ExchangeName, QueueName);
+                
                 // retry to connect 
                 _timer = new System.Timers.Timer();
                 _timer.Interval = 600000;
@@ -42,7 +50,6 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
                 _timer.Start();
                 return Task.CompletedTask;
             }
-
         }
         public Task StopAsync(CancellationToken cancellationToken)
         {
@@ -69,11 +76,14 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
                 bool result = false;
                 try
                 {
+                    _logger.LogReceived(Convert.ToBoolean(JObject.Parse(message)["IsCallBackMessage"]), message, JObject.Parse(message)["ReferenceNumber"].ToString());
+
                     result = await Process(message);
                 }
                 catch (Exception ex)
                 {
-                    // log
+                    _logger.LogError(ex, "failure when Process message {ExchangeName} {QueueName} {ReferenceNumber}",
+                        ExchangeName, QueueName, JObject.Parse(message)["ReferenceNumber"].ToString());
 
                     result = false;
                 }

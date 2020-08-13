@@ -1,5 +1,7 @@
 ﻿using ASyncFramework.Domain.Common;
+using ASyncFramework.Domain.Interface;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -14,11 +16,12 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
 {
     public class RabbitMQPersistent : IRabbitMQPersistent
     {
+        private readonly ConnectionFactory _factory;
+        private readonly IElkLogger<RabbitMQPersistent> _logger;
         private bool IsFailureConnection;
         private System.Timers.Timer _timer;
-        private readonly ConnectionFactory _factory;
         private IConnection _connection;
-        private IModel _channel;
+        private IModel _channel;        
         public IConnection Connection { get { if (_connection != null) { return _connection; } _connection = _factory.CreateConnection(); Connect(); return _connection; } }
         public IModel Channel => _channel ??= Connection.CreateModel();
         public bool IsConnected
@@ -29,8 +32,9 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
             }
         }
 
-        public RabbitMQPersistent(IOptions<AppConfiguration> options)
+        public RabbitMQPersistent(IOptions<AppConfiguration> options,IElkLogger<RabbitMQPersistent> logger)
         {
+            _logger = logger;
             _factory = new ConnectionFactory()
             {
                 HostName = options.Value.RabbitHost,
@@ -56,8 +60,7 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
 
         private void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
         {
-            // log 
-
+            _logger.LogError("ConnectionBlocked {sender} {e}", Newtonsoft.Json.JsonConvert.SerializeObject(sender), Newtonsoft.Json.JsonConvert.SerializeObject(e));
             // retry connect 
             if (_timer==null)
             {
@@ -71,7 +74,7 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
 
         private void OnCallbackException(object sender, CallbackExceptionEventArgs e)
         {
-            // log 
+            _logger.LogError("ConnectionCallbackException {sender} {e}", Newtonsoft.Json.JsonConvert.SerializeObject(sender), Newtonsoft.Json.JsonConvert.SerializeObject(e));
 
             // retry connect 
             if (_timer == null)
@@ -86,8 +89,7 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
 
         private void OnConnectionShutdown(object sender, ShutdownEventArgs e)
         {
-            // log 
-
+            _logger.LogError("ConnectionShutdown {sender} {e}", Newtonsoft.Json.JsonConvert.SerializeObject(sender), Newtonsoft.Json.JsonConvert.SerializeObject(e));
 
             // retry connect 
             if (_timer == null)
@@ -106,12 +108,11 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations
 
             try
             {
-                _connection = _factory.CreateConnection();
-
+                _ = Connection;
             }
             catch (Exception ex)
             {
-                // log 
+                _logger.LogError(ex, "open connection failure {sender} {e}", Newtonsoft.Json.JsonConvert.SerializeObject(sender), Newtonsoft.Json.JsonConvert.SerializeObject(e));
             }
             if (IsConnected)
             {

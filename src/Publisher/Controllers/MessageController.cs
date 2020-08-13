@@ -16,6 +16,7 @@ namespace Publisher.Controllers
         [HttpPost]
         public async Task<Result> Post([FromBody]PushRequestCommand command)
         {
+            
              return await Mediator.Send(command);
         }
 

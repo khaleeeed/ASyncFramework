@@ -2,6 +2,7 @@
 using ASyncFramework.Domain.Interface;
 using ASyncFramework.Domain.Model;
 using ASyncFramework.Infrastructure.Persistence.Configurations;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,7 +18,7 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber
         protected override string QueueName => _queueConfiguration.QueueName;
         QueueConfiguration _queueConfiguration;
         private readonly ISubscriberLogic _subscriberLogic;
-        public AutoMappingDelayQueue(IRabbitMQPersistent rabbitMQPersistent, ISubscriberLogic subscriberLogic, QueueConfiguration queueConfiguration) : base(rabbitMQPersistent)
+        public AutoMappingDelayQueue(IRabbitMQPersistent rabbitMQPersistent, ISubscriberLogic subscriberLogic, QueueConfiguration queueConfiguration,IElkLogger<RabbitListener>logger) : base(rabbitMQPersistent, logger)
         {
             _queueConfiguration = queueConfiguration;
             _subscriberLogic = subscriberLogic;
@@ -25,7 +26,7 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber
 
         public override async Task<bool> Process(string content)
         {
-            var message = System.Text.Json.JsonSerializer.Deserialize<Message>(content);
+            var message = Newtonsoft.Json.JsonConvert.DeserializeObject<Message>(content);
             await _subscriberLogic.Subscribe(message);
             return true;
         }
