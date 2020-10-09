@@ -1,7 +1,9 @@
 ﻿using ASyncFramework.Application.Common.Models;
+using ASyncFramework.Domain.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -44,11 +46,13 @@ namespace Publisher.Filters
         }
 
         private void HandleUnknownException(ExceptionContext context)
-        {           
+        {
+            IReferenceNumberService referenceNumber = context?.HttpContext?.RequestServices?.GetService<IReferenceNumberService>();
+
             var exceptionString = Newtonsoft.Json.JsonConvert.SerializeObject(context.Exception);
             var details = new Result(false, new List<string> { "An error occurred while processing your request.",exceptionString  })
             {
-                ReferenceNumber = Guid.NewGuid().ToString()
+                ReferenceNumber = referenceNumber?.ReferenceNumber
             };
 
             context.Result = new ObjectResult(details)
@@ -61,11 +65,12 @@ namespace Publisher.Filters
 
         private void HandleValidationException(ExceptionContext context)
         {
+            IReferenceNumberService referenceNumber = context?.HttpContext?.RequestServices?.GetService<IReferenceNumberService>();
             var exception = context.Exception as ASyncFramework.Application.Common.Exceptions.ValidationException;
 
             var details = new Result(false, ConvertDicToList(exception.Errors))
             {
-                ReferenceNumber = Guid.NewGuid().ToString()
+                ReferenceNumber = referenceNumber?.ReferenceNumber
             };
 
             context.Result = new ObjectResult(details)

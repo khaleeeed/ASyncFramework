@@ -1,0 +1,11 @@
+Library:-
+Application:    bussiness layer for all project 
+Domain:			common models , enum and inteface 
+Infrastructure: all extranl competent service , database and message broker 
+
+Project :-
+publisher:		push message to rabbitmq 
+subscriber:		resvice message from rabbitmq 
+Manager:		api for manage UI 
+QuartzManager:	recovery job run for catch all request send when rabbitmq down 
+UI:				user inteface for manage request 

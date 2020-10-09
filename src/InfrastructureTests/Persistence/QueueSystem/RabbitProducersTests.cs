@@ -8,12 +8,12 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.Tests
     [TestFixture()]
     public class RabbitProducersTests
     {
-        Mock<IRabbitMQPersistent> mockRabbitMQPersistent = new Mock<IRabbitMQPersistent>();
+        //Mock<IRabbitMQPersistent> mockRabbitMQPersistent = new Mock<IRabbitMQPersistent>();
         public RabbitProducersTests()
         {
-            var mockIModel = new Mock<IModel>();
-            mockIModel.Setup(x => x.CreateBasicProperties()).Returns(new Mock<IBasicProperties>().Object);
-            mockRabbitMQPersistent.Setup(x => x.Channel).Returns(mockIModel.Object);
+            //var mockIModel = new Mock<IModel>();
+            //mockIModel.Setup(x => x.CreateBasicProperties()).Returns(new Mock<IBasicProperties>().Object);
+            //mockRabbitMQPersistent.Setup(x => x.Channel).Returns(mockIModel.Object);
         }
         [Test()]
         public void RabbitProducersTest()

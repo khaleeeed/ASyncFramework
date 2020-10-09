@@ -5,9 +5,13 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using ASyncFramework.Domain.Interface;
+using System;
 
 namespace ASyncFramework.Application.Common.Behaviours
 {
+    /// <summary>
+    ///  class will log every request come from Mediatr 
+    /// </summary>
     public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     {
         private readonly Stopwatch _timer;
@@ -26,8 +30,14 @@ namespace ASyncFramework.Application.Common.Behaviours
             _currentUserService = currentUserService;
         }
 
+
         public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
+            var requestName = typeof(TRequest).Name;
+
+            if (requestName == "PushRequestCommand")
+                return await next();
+
             _timer.Start();
 
             var response = await next();
@@ -36,13 +46,14 @@ namespace ASyncFramework.Application.Common.Behaviours
 
             var elapsedMilliseconds = _timer.ElapsedMilliseconds;
 
+            // internal log if logger take more than 
             if (elapsedMilliseconds > 500)
             {
-                var requestName = typeof(TRequest).Name;
-                var userId = _currentUserService.SystemUser ?? string.Empty;
+               
+                var userId = _currentUserService.SystemCode ?? string.Empty;
 
-                _logger.LogWarning("ASyncFramework.publisher Long Running Request:- RequestName {Name} ({ElapsedMilliseconds} milliseconds) {@UserId} {@Request} {ReferenceNumber}",
-                    requestName, elapsedMilliseconds, userId, request,_referenceNumberService.ReferenceNumber);
+                _logger.LogWarning("ASyncFramework.publisher Long Running Request:- RequestName {CreationDate} {Name} ({ElapsedMilliseconds} milliseconds) {@UserId} {@Request} {ReferenceNumber}",
+                    DateTime.Now,requestName, elapsedMilliseconds, userId, request,_referenceNumberService.ReferenceNumber);
             }
 
             return response;

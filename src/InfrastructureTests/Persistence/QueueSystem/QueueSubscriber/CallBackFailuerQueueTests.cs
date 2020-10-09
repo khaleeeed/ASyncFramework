@@ -14,7 +14,7 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber.
     [TestFixture()]
     public class CallBackFailuerQueueTests
     {
-        Mock<IRabbitMQPersistent> mockRabbitMQPersistent = new Mock<IRabbitMQPersistent>();
+        //Mock<IRabbitMQPersistent> mockRabbitMQPersistent = new Mock<IRabbitMQPersistent>();
         Mock<ISubscriberLogic> mockSubscriberLogic = new Mock<ISubscriberLogic>();        
 
         [Test()]

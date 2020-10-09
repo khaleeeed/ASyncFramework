@@ -8,7 +8,7 @@ namespace ASyncFramework.Domain.Model.Request
     public class Request:BaseRequest
     {
         public MethodVerb MethodVerb { get; set; }
-        public string ContentBody { get; set; }
+        public object ContentBody { get; set; }
         public Dictionary<string, string> Headers { get; set; }
 
     }

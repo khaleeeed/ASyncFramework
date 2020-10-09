@@ -5,18 +5,23 @@ using System.Text;
 namespace ASyncFramework.Domain.Enums
 {
     public enum MessageLifeCycle
-    {
-        NewRequest,
-        PublishingTarget,
-        ReceivedTarget,
-        SendTargetRequest,
-        RetryTarget,
-        FinishInTarget,
-        PublishingCallBack,
-        ReceivedCallBack,
-        SendCallBackRequest,
-        RetryCallBack,
-        FinishInCallBackFailure,
-        FinishInSuccessed
+    {        
+        NewRequest,     
+        PushToQueue,     
+        ReceiveFromQueue,        
+        SendRequestToTarget,     
+        RetrySendingTarget,
+        TargetUsedAllRetries,
+        PushCallBackToQueue,
+        ReceiveCallBackFromQueue,
+        SendRequestToCallBack,
+        RetrySendingCallBack,
+        CallBackUsedAllRetries,
+        Succeeded,
+        ExceptoinWhenProcessNewRequest,
+        ExceptoinWhenProcessMessage,
+        ExceptoinWhenSendTargetRequest,
+        ExceptoinWhenSendCallBackRequest,
+        ValidationError
     }
 }

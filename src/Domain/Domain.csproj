@@ -6,6 +6,9 @@
     <AssemblyName>ASyncFramework.Domain</AssemblyName>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="Model\Message.cs~RF108941d.TMP" />
   </ItemGroup>

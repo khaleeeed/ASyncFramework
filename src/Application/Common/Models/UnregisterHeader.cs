@@ -9,7 +9,8 @@ namespace ASyncFramework.Application.Common.Models
         public static List<string> UnregisteredHeaders = new List<string>
         {
             "Content-Type",
-            "Content-Length"
+            "Content-Length",
+            "Host"
         };
     }
 }

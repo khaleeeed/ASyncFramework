@@ -1,0 +1,47 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: Docker@2
+  displayName: Building manager image
+  inputs:
+    containerRegistry: 'ApiPlatformRegistry'
+    repository: 'asynch/manager'
+    command: 'buildAndPush'
+    Dockerfile: 'Manager/Dockerfile'
+    tags: |
+      $(Build.BuildId)
+      latest
+    buildContext: .
+
+- task: Docker@2
+  displayName: Building publisher image
+  inputs:
+    containerRegistry: 'ApiPlatformRegistry'
+    repository: 'asynch/publisher'
+    command: 'buildAndPush'
+    Dockerfile: 'src/Publisher/Dockerfile'
+    tags: |
+      $(Build.BuildId)
+      latest
+    buildContext: ./src
+
+- task: Docker@2
+  displayName: Building Subscriber image
+  inputs:
+    containerRegistry: 'ApiPlatformRegistry'
+    repository: 'asynch/Subscriber'
+    command: 'buildAndPush'
+    Dockerfile: 'src/Subscriber/Dockerfile'
+    tags: |
+      $(Build.BuildId)
+      latest
+    buildContext: ./src   

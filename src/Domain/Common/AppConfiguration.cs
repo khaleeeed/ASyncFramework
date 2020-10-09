@@ -6,8 +6,10 @@ namespace ASyncFramework.Domain.Common
 {
     public class AppConfiguration
     {
-        public string RabbitHost { get; set; }
-        public string RabbitUserName { get; set; }
-        public string RabbitPassword { get; set; }
+        public const string RabbitMq = "RabbitMQConfig";
+        public const string Elastic = "ElasticConfig";
+        public string Host { get; set; }
+        public string UserName { get; set; }
+        public string Password { get; set; }
     }
 }

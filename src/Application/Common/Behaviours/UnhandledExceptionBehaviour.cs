@@ -1,4 +1,6 @@
-﻿using ASyncFramework.Application.Common.Interfaces;
+﻿using ASyncFramework.Application.Common.Exceptions;
+using ASyncFramework.Application.Common.Interfaces;
+using ASyncFramework.Domain.Enums;
 using ASyncFramework.Domain.Interface;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -25,12 +27,14 @@ namespace ASyncFramework.Application.Common.Behaviours
             {
                 return await next();
             }
+            catch (ValidationException)
+            {
+                _logger.LogWarning("{Status} {ReferenceNumber}", MessageLifeCycle.ValidationError, _referenceNumberService.ReferenceNumber);
+                throw;
+            }
             catch (Exception ex)
             {
-                var requestName = typeof(TRequest).Name;
-
-                _logger.LogError(ex, "ASyncFramework Request: Unhandled Exception for Request {Name} {Request} {ReferenceNumber}", requestName, request,_referenceNumberService.ReferenceNumber);
-
+                _logger.LogError(ex, MessageLifeCycle.ExceptoinWhenProcessNewRequest,_referenceNumberService.ReferenceNumber);
                 throw;
             }
         }

@@ -4,15 +4,17 @@ using ASyncFramework.Application.SubscribeRequestLogic;
 using ASyncFramework.Domain.Common;
 using ASyncFramework.Domain.Interface;
 using ASyncFramework.Infrastructure;
-using ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber;
+using ASyncFramework.Infrastructure.Persistence;
+using ASyncFramework.Infrastructure.Persistence.MessageBroker.QueueSystem.QueueSubscriber;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Subscriber.HttpRequestCode;
-using Subscriber.Service;
+using System.Collections.Generic;
 
 namespace Subscriber
 {
@@ -30,22 +32,25 @@ namespace Subscriber
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddApplication();
-            services.AddInfrastructure(Configuration);
+            services.AddInfrastructure();
+            services.AddRabbitMQInfrastructure(Configuration);
+            services.AddElasticSerilog(Configuration);
+            services.AddNestInfrastructure(Configuration);
             services.AddTransient<ISubscriberLogic, SubscriberLogic>();
             services.AddHostedService<DirectQueue>();
             services.AddHostedService<CallBackFailuerQueue>();
             services.AddHostedService<RunTimeQueue>();
-
+            services.AddTransient(typeof(ICurrentUserService),sp=> null);
+            services.AddTransient(typeof(IReferenceNumberService), sp => null);
+            services.AddTransient(typeof(IAllHeadersPerRequest), sp => null);
             services.AddControllers();
 
-            services.AddHealthChecks().AddRabbitMQ((s) => { var app = s.GetService<IOptions<AppConfiguration>>(); return new RabbitMQ.Client.ConnectionFactory() { HostName = app.Value.RabbitHost, Password = app.Value.RabbitPassword, UserName = app.Value.RabbitUserName }; });
-           
-            services.AddHttpContextAccessor();
-
-            services.AddTransient<IConvertRequestToHttpRequestMessage, ConvertRequestToHttpRequestMessage>();
-            services.AddScoped<ICurrentUserService, CurrentUserService>();
-            services.AddTransient<IReferenceNumberService, ReferenceNumberService>();
-            services.AddTransient<IAllHeadersPerRequest, AllHeadersPerRequest>();
+            services.AddHealthChecks().AddRabbitMQ((s) => 
+            {
+                var app = s.GetService<IOptionsSnapshot<AppConfiguration>>().Get(AppConfiguration.RabbitMq);
+                return new RabbitMQ.Client.ConnectionFactory() { HostName = app.Host, Password = app.Password, UserName = app.UserName };
+            });
+                      
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

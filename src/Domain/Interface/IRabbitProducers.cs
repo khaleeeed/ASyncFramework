@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace ASyncFramework.Domain.Interface
 {
-    public interface IRabbitProducers:IDisposable
+    public interface IRabbitProducers
     {
         void PushMessage(Message message, QueueConfiguration queueConfiguration);
     }

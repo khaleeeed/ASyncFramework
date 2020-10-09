@@ -7,7 +7,7 @@ using Moq;
 using NUnit.Framework;
 using System.Threading;
 using System.Threading.Tasks;
-
+using ASyncFramework.Infrastructure.Persistence.MessageBroker.Configurations;
 
 namespace ASyncFramework.Infrastructure.Persistence.Configurations.Tests
 {
@@ -21,9 +21,9 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations.Tests
         {
             options.Setup(x => x.Value).Returns(new AppConfiguration
             {
-                RabbitHost = "localhost",
-                RabbitPassword = "guest",
-                RabbitUserName = "guest"
+                Host = "localhost",
+                Password = "guest",
+                UserName = "guest"
             });
             rabbitMQPersistent = new Mock<RabbitMQPersistent>(options.Object);
         }
@@ -37,9 +37,7 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations.Tests
         [Test()]
         public void DisposeTest()
         {
-            rabbitMQPersistent.Object.Dispose();
-            rabbitMQPersistent.Object.Dispose();
-            rabbitMQPersistent.Object.Dispose();
+
         }
     }
 }

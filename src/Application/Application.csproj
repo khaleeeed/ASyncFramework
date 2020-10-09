@@ -6,6 +6,15 @@
     <AssemblyName>ASyncFramework.Application</AssemblyName>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="SubscribeRequestLogic\SubscriberLogic.cs~RF26e470a.TMP\**" />
+    <EmbeddedResource Remove="SubscribeRequestLogic\SubscriberLogic.cs~RF26e470a.TMP\**" />
+    <None Remove="SubscribeRequestLogic\SubscriberLogic.cs~RF26e470a.TMP\**" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="8.6.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="8.6.0" />

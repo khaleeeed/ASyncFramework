@@ -2,64 +2,86 @@
 using ASyncFramework.Domain.Interface;
 using ASyncFramework.Domain.Model;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
 
 namespace ASyncFramework.Infrastructure.Persistence.LoggingRepo
 {
+
+    // register as Singleton
+    // responsibility log in elk 
     public class ElkLogger<T> : IElkLogger<T>
     {
-        private ILogger _logger;
+
+        private readonly Microsoft.Extensions.Logging.ILogger _logger;
 
         public ElkLogger(ILogger<T> logger)
         {
             _logger = logger;
         }
-    
-         
-        public void LogNewRequest(string requestName, string systemId, object request, string referenceNumber, object headrs)
+
+
+        public void LogNewRequest(string systemId, object request, string referenceNumber, object headrs, string hash, string targetUrl, string callBackUrl, string Content, string ContentType)
         {
-            _logger.LogInformation("{Status}: {Name} {UserId} {Request} {ReferenceNumber} {Headers}",
-                        MessageLifeCycle.NewRequest, requestName, systemId, Newtonsoft.Json.JsonConvert.SerializeObject(request), referenceNumber, Newtonsoft.Json.JsonConvert.SerializeObject(headrs));
+
+            var obj = ObjectConverter.ContentType(Content, ContentType);
+
+            Log.ForContext("ContentBody", obj, true).ForContext("Headers", headrs, true).Information(
+                "{CreationDate} {Status} {UserId} {Request} {ReferenceNumber} {Hash} {TargetUrl} {CallBackUrl}",
+                        DateTime.Now, MessageLifeCycle.NewRequest, systemId,
+                        Newtonsoft.Json.JsonConvert.SerializeObject(request, Newtonsoft.Json.Formatting.Indented),
+                         referenceNumber, hash, targetUrl, callBackUrl);
         }
 
         public void LogPublishing(Message message)
         {
-            _logger.LogInformation("{status} {ReferenceNumber} {Message}",
-               message.IsCallBackMessage ? MessageLifeCycle.PublishingCallBack : MessageLifeCycle.PublishingTarget, message.ReferenceNumber, Newtonsoft.Json.JsonConvert.SerializeObject(message));
+            Log.ForContext("Message", message, true).Information("{CreationDate} {Status} {ReferenceNumber}",
+               DateTime.Now, message.IsCallBackMessage ? MessageLifeCycle.PushCallBackToQueue : MessageLifeCycle.PushToQueue, message.ReferenceNumber);
         }
 
-        public void LogReceived(bool IsCallBackMessage,string message,string refranceNumber)
+        public void LogReceived(bool IsCallBackMessage, string refranceNumber)
         {
-            _logger.LogInformation("{Status}: {Message} {ReferenceNumber}",
-                        IsCallBackMessage ? MessageLifeCycle.ReceivedCallBack : MessageLifeCycle.ReceivedTarget,
-                        message, refranceNumber);
+            _logger.LogInformation("{CreationDate} {Status} {ReferenceNumber}",
+                        DateTime.Now, IsCallBackMessage ? MessageLifeCycle.ReceiveCallBackFromQueue : MessageLifeCycle.ReceiveFromQueue,
+                        refranceNumber);
         }
 
-        public void SendRequest(bool IsCallBackMessage, string refrenceNumber,string token,string statusCode,string content)
+        public void LogSendRequest(bool IsCallBackMessage, string refrenceNumber, string token, int statusCode, string content, string url)
         {
-            _logger.LogInformation("{Status} {ReferenceNumber} {Token} {StatusCode} {ResponseContent}",
-                IsCallBackMessage ? MessageLifeCycle.SendCallBackRequest: MessageLifeCycle.SendTargetRequest, refrenceNumber, token, statusCode, content);
+            _logger.LogInformation("{CreationDate} {Status} {ReferenceNumber} {Token} {StatusCode} {ResponseContent} {Url}",
+                DateTime.Now, IsCallBackMessage ? MessageLifeCycle.SendRequestToCallBack : MessageLifeCycle.SendRequestToTarget,
+                refrenceNumber, token, statusCode, content, url);
         }
 
-        public void LogFinish(MessageLifeCycle  finshMessage, string referenceNumber)
+        public void LogFinish(MessageLifeCycle finshMessage, string referenceNumber)
         {
-            _logger.LogInformation("{Status}: {ReferenceNumber}",
-                        finshMessage, referenceNumber);
+            _logger.LogInformation("{CreationDate} {Status} {ReferenceNumber}",
+                        DateTime.Now, finshMessage, referenceNumber);
         }
 
         public void LogRetry(MessageLifeCycle retryTarget, string referenceNumber, string queue, int retry)
         {
-            _logger.LogInformation("{Status} {ReferenceNumber} {Queues} {Retry}",
-                retryTarget, queue, queue, retry);
+            _logger.LogInformation("{CreationDate} {Status} {ReferenceNumber} {Queues} {Retry}",
+                DateTime.Now, retryTarget, referenceNumber, queue, retry);
         }
 
-        public void LogError(Exception ex,string template,params object[] args)
+        public void LogErrorSendRequest(Exception ex, bool IsCallBackMessage, string refrenceNumber, string url)
         {
-            _logger.LogError(ex,template,args);
+            _logger.LogError(ex, "{CreationDate} {Status} {ReferenceNumber} {Url}",
+                DateTime.Now, IsCallBackMessage ? MessageLifeCycle.ExceptoinWhenSendCallBackRequest : MessageLifeCycle.ExceptoinWhenSendTargetRequest,
+                refrenceNumber, url);
         }
+
+        public void LogError(Exception ex, MessageLifeCycle lifeCycle, string referenceNumber)
+        {
+            _logger.LogError(ex, "{CreationDate} {Status} {ReferenceNumber}", DateTime.Now, lifeCycle, referenceNumber);
+        }
+
+        public void LogError(Exception ex, string template, params object[] args)
+        {
+            _logger.LogError(ex, template, args);
+        }
+
         public void LogError(string template, params object[] args)
         {
             _logger.LogError(template, args);
@@ -68,6 +90,6 @@ namespace ASyncFramework.Infrastructure.Persistence.LoggingRepo
         public void LogWarning(string template, params object[] args)
         {
             _logger.LogWarning(template, args);
-        }        
+        }
     }
 }

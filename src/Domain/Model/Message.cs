@@ -12,7 +12,9 @@ namespace ASyncFramework.Domain.Model
         public string Queues { get; set; }
         public int Retry { get; set; }
         public bool IsCallBackMessage { get; set; }
-        public string HttpStatusCode { get; set; }
+        public bool IsFailureMessage { get; set; }
+        public int? HttpStatusCode { get; set; }
+        public string SystemCode { get; set; }
         public Dictionary<string, string> Headers { get; set; }
 
         public Request.Request TargetOAuthRequest { get; set; }
@@ -21,4 +23,4 @@ namespace ASyncFramework.Domain.Model
         public CallBackRequest CallBackRequest { get; set; }
         public Request.Request CallBackOAuthRequest { get; set; }
     }
-}
+}   
