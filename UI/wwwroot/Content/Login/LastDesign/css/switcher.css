@@ -1,0 +1,110 @@
+/* =================================================================== */
+/* Styles Switcher
+====================================================================== */
+
+	#style-switcher h3 {
+		color:#fff;
+		font-size:12px;
+		margin: 5px 0 -3px 3px;
+	}
+	
+	#style-switcher {
+		background: #303030;
+		width: 195px;
+		position:fixed;
+		top:50px;
+		z-index:9999;
+		border-radius: 0 0 3px 0;
+		left: -195px;
+	}
+	
+	#style-switcher div {
+		padding: 5px 10px;
+	}
+	
+	#style-switcher h2 {
+		background: #404040;
+		color: #FFFFFF;
+		font-weight: bold;
+		padding: 0;
+		font-size: 13px;
+		padding: 6px 0 5px 10px;
+	}
+	
+	#style-switcher h2 a {
+		background: url("../images/switcher.png") no-repeat 9px center transparent;
+		background-color: #404040;
+		display: block;
+		height: 41px;
+		position: absolute;
+		right: -39px;
+		text-indent: -9999px;
+		top: 0;
+		width: 39px;
+		border-radius: 0 3px 3px 0;
+	}
+	
+	.colors { list-style:none; margin:0px 0px 10px 0px; overflow: hidden}
+	.colors li { float:left; margin:2px; }
+	.colors li a { display: block; width:15px; height:15px; cursor: pointer;} 
+	
+	#menu-style {
+		width: 100%;
+		padding: 5px;
+		border: none;
+		width: 165px;
+		margin: -3px 0 12px 3px;
+		color: #666;
+		border-radius: 1px;
+		cursor: pointer;
+	}
+	
+	#reset {margin: 0 0 15px 2px;}
+	#reset a {color: #fff; font-size: 12px; padding: 5px 14px; box-shadow: none; border-radius: 1px; }
+	
+	.blue { background: #169fe6; }
+	.green { background: #7cb600; }
+	.orange {background: #fa5b0f; }
+	.navy { background: #495d7f; }
+	.yellow { background: #ffb400; }
+	.peach { background :#fcab55; }
+	.red { background: #c62020; }
+	.beige { background: #bfa980; }
+	.pink { background: #c71c77; }
+	.cyan { background: #37b6bd;}
+	.celadon { background: #74aea1;}
+	.brown { background: #784e3d; }
+	.cherry { background: #911938;}
+	a.gray { background: #707070;}
+	.purple { background: #6957af; }
+	.olive { background: #b3c211; }
+	.dark { background: #404040; }
+	.dirty-green { background: #3b6e40; }
+
+	.bg1 { background-image: url("../images/bg/noise.png"); }
+	.bg2 { background-image: url("../images/bg/retina_dust.png"); }
+	.bg3 { background-image: url("../images/bg/brushed_alu.png"); }
+	.bg4 { background-image: url("../images/bg/crisp_paper_ruffles.png"); }
+	.bg5 { background-image: url("../images/bg/grey.png"); }
+	.bg6 { background-image: url("../images/bg/bedge_grunge.png"); }
+	.bg7 { background-image: url("../images/bg/diamond_upholstery.png"); }
+	.bg8 { background-image: url("../images/bg/egg_shell.png"); }
+	.bg9 { background-image: url("../images/bg/light_toast.png"); }
+	.bg10 { background-image: url("../images/bg/noise_pattern_with_crosslines.png"); }
+	.bg11 { background-image: url("../images/bg/purty_wood.png"); }
+	.bg12 { background-image: url("../images/bg/subtle_stripes.png"); }
+	.bg13 { background-image: url("../images/bg/textured_stripes.png"); }
+	.bg14 { background-image: url("../images/bg/tileable_wood_texture.png"); }
+	.bg15 { background-image: url("../images/bg/scribble_light.png"); }
+	.bg16 { background-image: url("../images/bg/linedpaper.png"); }
+	.bg17 { background-image: url("../images/bg/vichy.png"); }
+	.bg18 { background-image: url("../images/bg/washi.png"); }
+	.colors li a.active { box-shadow:0 0 0 2px #505050 inset }
+	
+	@media only screen and (max-width: 1029px) { #style-switcher { display: none; } }
+	@media (min--moz-device-pixel-ratio: 1.3),
+	   (-o-min-device-pixel-ratio: 2.6/2),
+	   (-webkit-min-device-pixel-ratio: 1.3),
+	   (min-device-pixel-ratio: 1.3),
+	   (min-resolution: 1.3dppx) { #style-switcher h2 a { background: url("../images/switcher@2x.png") no-repeat 9px center transparent; background-size: 21px; background-color: #404040; } }
+	   

@@ -1,10 +1,12 @@
 ﻿using ASyncFramework.Domain.Common;
+using ASyncFramework.Domain.Interface;
 using FluentValidation;
 using FluentValidation.Validators;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
@@ -13,107 +15,86 @@ using System.Threading.Tasks;
 
 namespace ASyncFramework.Application.PushRequestLogic
 {
+
     /// <summary>
-    /// PushRequestCommand validator call from midetor ValidationBehavior 
+    /// PushRequestCommand validator call from midetor ValidationBehavior
     /// </summary>
     public class PushRequestValidator : AbstractValidator<PushRequestCommand>
     {
-        public PushRequestValidator(IOptions<Dictionary<string, QueueConfiguration>> queueConfiguration)
+        public PushRequestValidator(IQueueConfigurationService queueConfiguration)
         {
             // PushRequestCommand object required 
             RuleFor(x => x).NotNull().DependentRules(() =>
             {
-                // Queues must be number and comma separated  
+                // Queues must be number and comma separated 
                 RuleFor(x=>x.Queues).NotEmpty().Matches(@"\d{1,2}(,\d{1,2})*$").DependentRules(()=> 
                 {
                     // check if all queue present in system 
-                    RuleFor(x => x.Queues).CustomAsync((x, c, ct) => CheckAllQueuepresent(x, c, ct, queueConfiguration.Value));
+                    RuleFor(x => x.Queues).CustomAsync((x, c, ct) => CheckAllQueuepresent(x, c, ct, queueConfiguration));
 
                 }).WithMessage("Queues format *,*,*");                
 
                 // targetRequest object required
-                RuleFor(x=>x.TargetRequest).NotNull().DependentRules(()=> 
+                RuleFor(x=>x.TargetRequest).NotNull().DependentRules(()=>
                 {
-                    // check if enum is not in range 
-                    RuleFor(x => x.TargetRequest.MethodVerb).IsInEnum();
+                    RuleFor(x => x.TargetRequest.TargetServiceRequest).NotNull().DependentRules(() => 
+                    {
+                        // check if enum is not in range 
+                        RuleFor(x => x.TargetRequest.TargetServiceRequest.MethodVerb).IsInEnum();
 
-                    // check ContentType if null set default
-                    RuleFor(x => x).CustomAsync((x, c, ct) => SetContentType(x.TargetRequest,c,ct));
-                   
-                    // url property must url format 
-                    RuleFor(x=>x.TargetRequest.Url).Must(tu => Uri.IsWellFormedUriString(tu, UriKind.Absolute)).WithMessage("TargetRequest.Url required with uriFormat");
+                        // check ContentType if null set default
+                        RuleFor(x => x).CustomAsync((x, c, ct) => SetContentType(x.TargetRequest.TargetServiceRequest, c, ct));
 
-                    // url containst async 
-                    RuleFor(x => x.TargetRequest.Url).Must(t => !t.Contains("ASyncFramework.")).WithMessage("Cannot use ASync api as TargetRequest.url");
-                    RuleFor(x => x.TargetRequest.Url).Must(t => !t.Contains("async/api")).WithMessage("Cannot use ASync api as TargetRequest.url");
+                        // url property must url format
+                        RuleFor(x => x.TargetRequest.TargetServiceRequest.Url).Must(tu => Uri.IsWellFormedUriString(tu, UriKind.Absolute)).WithMessage("TargetRequest.Url required with uriFormat");
+                        RuleFor(x => x.TargetRequest.TargetServiceRequest).CustomAsync((x, c, ct) => CheckUrl(x, c, ct));
 
-                    // SoapAction required when ServiceType = SOAP
-                    RuleFor(x => x.TargetRequest.SoapAction).NotEmpty().When(x => x.TargetRequest.ServiceType == Domain.Enums.ServiceType.SOAP).WithMessage("TargetRequest.SoapAction required when send SOAP request");
+                        // url containst async 
+                        RuleFor(x => x.TargetRequest.TargetServiceRequest.Url).Must(t => !t.Contains("ASyncFramework.")).WithMessage("Cannot use ASync api as TargetRequest.url");
+                        RuleFor(x => x.TargetRequest.TargetServiceRequest.Url).Must(t => !t.Contains("10.162.1.164")).WithMessage("Cannot use ASync api as TargetRequest.url");
 
-                    // MethodVerb must be Post when ServiceType = SOAP
-                    RuleFor(x => x.TargetRequest.MethodVerb).Equal(Domain.Enums.MethodVerb.Post).When(x => x.TargetRequest.ServiceType == Domain.Enums.ServiceType.SOAP).WithMessage("TargetRequest.MethodVerb must equal post when send SOAP request");
+                        // SoapAction required when ServiceType = SOAP
+                        RuleFor(x => x.TargetRequest.TargetServiceRequest.SoapAction).NotEmpty().When(x => x.TargetRequest.TargetServiceRequest.ServiceType == Domain.Enums.ServiceType.SOAP).WithMessage("TargetRequest.SoapAction required when send SOAP request");
+
+                        // MethodVerb must be Post when ServiceType = SOAP
+                        RuleFor(x => x.TargetRequest.TargetServiceRequest.MethodVerb).Equal(Domain.Enums.MethodVerb.Post).When(x => x.TargetRequest.TargetServiceRequest.ServiceType == Domain.Enums.ServiceType.SOAP).WithMessage("TargetRequest.MethodVerb must equal post when send SOAP request");
+                    }).WithMessage("TargetServiceRequest required");
 
                 }).WithMessage("TargetRequest required");
 
-                //check ContentType if null set default
-                RuleFor(x => x.TargetOAuthRequest).CustomAsync((x, c, ct) => SetContentTypeForOAuthApi(x, c, ct));
-
-                // check if enum is not in range 
-                RuleFor(x => x.TargetOAuthRequest.MethodVerb).IsInEnum().When(x => x.TargetOAuthRequest != null);
-
-                // url property must url format when TargetOAuthRequest not null
-                RuleFor(x => x.TargetOAuthRequest.Url).Must(tu => Uri.IsWellFormedUriString(tu, UriKind.Absolute)).When(x => x.TargetOAuthRequest != null).WithMessage("TargetOAuthRequest.Url required with uriFormat");
-
-                // url containst async 
-                RuleFor(x => x.TargetOAuthRequest.Url).Must(t => !t.Contains("ASyncFramework.")).When(x => x.TargetOAuthRequest != null).WithMessage("Cannot use ASync api as TargetOAuthRequest.url");
-                RuleFor(x => x.TargetOAuthRequest.Url).Must(t => !t.Contains("async/api")).When(x => x.TargetOAuthRequest != null).WithMessage("Cannot use ASync api as TargetOAuthRequest.url");
-
-                RuleFor(x => x.TargetOAuthRequest.ServiceType).Equal(Domain.Enums.ServiceType.RESTful).When(x => x.TargetOAuthRequest != null).WithMessage("TargetOAuthRequest.ServiceType must equal RESTful");
-
                 // CallBackRequest object rquired 
-                RuleFor(x => x.CallBackRequest).NotNull().DependentRules(() =>
+                RuleFor(x => x.CallBackRequest).Must(x => x.Count < 3).When(x => x.CallBackRequest != null).DependentRules(() =>
                 {
                     // check ContentType if null set default
-                    RuleFor(x => x).CustomAsync((x, c, ct) => SetContentType(x.CallBackRequest, c, ct));
+                    RuleForEach(x => x.CallBackRequest).CustomAsync((x, c, ct) => SetContentType(x.CallBackServiceRequest, c, ct));
 
                     // url property must url format 
-                    RuleFor(x => x.CallBackRequest.Url).Must(tu => Uri.IsWellFormedUriString(tu, UriKind.Absolute)).WithMessage("CallBackRequest.Url required with uriFormat");
+                    RuleForEach(x => x.CallBackRequest).Must(tu => Uri.IsWellFormedUriString(tu.CallBackServiceRequest.Url, UriKind.Absolute)).When(x => x.CallBackRequest != null).WithMessage("CallBackRequest.Url required with uriFormat");
 
-                    // url containst async 
-                    RuleFor(x => x.CallBackRequest.Url).Must(t => !t.Contains("ASyncFramework.")).WithMessage("Cannot use ASync api as CallBackRequest.url");
-                    RuleFor(x => x.CallBackRequest.Url).Must(t => !t.Contains("async/api")).WithMessage("Cannot use ASync api as CallBackRequest.url");
+                    // url containst async
+                    RuleForEach(x => x.CallBackRequest).ChildRules(child=>child.RuleFor(x=>x.CallBackServiceRequest).Must(t => !t.Url.Contains("ASyncFramework.")).When(t=> t.CallBackServiceRequest.Url != null)).When(x => x.CallBackRequest != null).WithMessage("Cannot use ASync api as CallBackRequest.url");
+                    RuleForEach(x => x.CallBackRequest).ChildRules(child => child.RuleFor(x => x.CallBackServiceRequest).Must(t => !t.Url.Contains("10.162.1.164")).When(t => t.CallBackServiceRequest.Url != null)).When(x => x.CallBackRequest != null).WithMessage("Cannot use ASync api as CallBackRequest.url");
+
+                    RuleForEach(x => x.CallBackRequest).CustomAsync((x, c, ct) => CheckUrl(x.CallBackServiceRequest, c, ct));
 
                     // SoapAction required when ServiceType = SOAP
-                    RuleFor(x => x.CallBackRequest.SoapAction).NotEmpty().When(x => x.TargetRequest.ServiceType == Domain.Enums.ServiceType.SOAP).WithMessage("CallBackRequest.SoapAction required when send SOAP request");
+                    RuleForEach(x => x.CallBackRequest).ChildRules(child => child.RuleFor(x => x.CallBackServiceRequest.SoapAction).NotEmpty().When(x=>x.CallBackServiceRequest.ServiceType == Domain.Enums.ServiceType.SOAP).WithMessage("CallBackRequest.SoapAction required when send SOAP request"));
+          
+                
+                }).WithMessage("callback service shouldn't greater than 2");
 
-                }).WithMessage("CallBackRequest required");
-
-                // check if enum is not in range 
-                RuleFor(x => x.CallBackOAuthRequest.MethodVerb).IsInEnum().When(x => x.CallBackOAuthRequest != null);
-
-                //check ContentType if null set default
-                RuleFor(x => x.CallBackOAuthRequest).CustomAsync((x, c, ct) => SetContentTypeForOAuthApi(x, c, ct));
-
-                // url property must url format when TargetOAuthRequest not null
-                RuleFor(x => x.CallBackOAuthRequest.Url).Must(tu => Uri.IsWellFormedUriString(tu, UriKind.Absolute)).When(x => x.CallBackOAuthRequest != null).WithMessage("CallBackOAuthRequest.Url required with uriFormat");
-
-                // url containst async 
-                RuleFor(x => x.CallBackOAuthRequest.Url).Must(t => !t.Contains("ASyncFramework.")).When(x => x.CallBackOAuthRequest != null).WithMessage("Cannot use ASync api as CallBackOAuthRequest.url");
-                RuleFor(x => x.CallBackOAuthRequest.Url).Must(t => !t.Contains("async/api")).When(x => x.CallBackOAuthRequest != null).WithMessage("Cannot use ASync api as CallBackOAuthRequest.url");
-
-
-                RuleFor(x => x.CallBackOAuthRequest.ServiceType).Equal(Domain.Enums.ServiceType.RESTful).When(x => x.CallBackOAuthRequest != null).WithMessage("CallBackOAuthRequest.ServiceType must equal RESTful");
-
+       
             }).WithMessage("PushRequestCommand required");
         }
 
-        private Task CheckAllQueuepresent(string stringQueue, CustomContext c, CancellationToken ct, Dictionary<string, QueueConfiguration> value)
+        private Task CheckAllQueuepresent(string stringQueue, CustomContext c, CancellationToken ct, IQueueConfigurationService value)
         {
             var queues = stringQueue.Split(",");
 
             foreach (var queue in queues)
             {
-                if (!value.ContainsKey(queue))
+                
+                if (!value.QueueConfiguration.ContainsKey(queue))
                 {
                     c.AddFailure($"{queue} Queue is not present in the system");
                 }
@@ -143,6 +124,10 @@ namespace ASyncFramework.Application.PushRequestLogic
 
         private Task SetContentType(Domain.Model.Request.BaseRequest request,CustomContext c,CancellationToken ct)
         {
+            if (request == null)
+            {
+                return Task.CompletedTask;
+            }
             
             if (string.IsNullOrWhiteSpace(request.ContentType))
             {
@@ -157,8 +142,17 @@ namespace ASyncFramework.Application.PushRequestLogic
             }
             else
             {
-                if (!MediaTypeWithQualityHeaderValue.TryParse(request.ContentType, out _))
+                try
+                {
+                    if (!MediaTypeWithQualityHeaderValue.TryParse(request.ContentType, out _))
+                        c.AddFailure($"{c.PropertyName}.ContentType media type ({request.ContentType}) is invalid.");
+                    else
+                        new System.Net.Http.StringContent(string.Empty, Encoding.UTF8, request.ContentType);
+                }
+                catch
+                {
                     c.AddFailure($"{c.PropertyName}.ContentType media type ({request.ContentType}) is invalid.");
+                }
             }
             return Task.CompletedTask;
         }
@@ -168,6 +162,22 @@ namespace ASyncFramework.Application.PushRequestLogic
             if (request != null)
                 SetContentType(request, c, ct);
 
+            return Task.CompletedTask;
+        }
+
+        private Task CheckUrl(Domain.Model.Request.BaseRequest request, CustomContext c, CancellationToken ct)
+        {
+            if (request == null)
+                return Task.CompletedTask;
+            try
+            {
+                new HttpRequestMessage(HttpMethod.Get, request.Url);
+            }
+            catch
+            {
+                c.AddFailure($"{c.PropertyName}.url ({request.Url}) is invalid.");
+            }
+ 
             return Task.CompletedTask;
         }
     }

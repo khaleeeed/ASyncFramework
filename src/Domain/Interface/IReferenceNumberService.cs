@@ -2,6 +2,6 @@
 {
     public interface IReferenceNumberService
     {
-        string ReferenceNumber { get; }
+        string ReferenceNumber { get; set; }
     }
 }

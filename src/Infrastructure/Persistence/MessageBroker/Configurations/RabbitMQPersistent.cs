@@ -21,17 +21,18 @@ namespace ASyncFramework.Infrastructure.Persistence.MessageBroker.Configurations
     {
         public string ConnectionName { get; set; } = null;       
         private readonly ConnectionFactory _factory;
-        private readonly IElkLogger<RabbitMQPersistent> _logger;
+        private readonly IInfrastructureLogger<RabbitMQPersistent> _logger;
         private readonly IGetIPAddress _IPAddressService;
         private IConnection _connection;
-        private IModel _channel;        
+        private IModel _channel;
+        private int _numberOfChannel=0;
         public IConnection Connection
         {
             get
             {                
                 if (IsConnected )
                     return _connection;
-                _connection = _factory.CreateConnection($"{_IPAddressService.LocalIpAddress}-{ConnectionName??"Producers"}");
+               _connection = _factory.CreateConnection($"{_IPAddressService.LocalIpAddress}-{ConnectionName??"Producers"}");
                 Connect();
                 return _connection;
             }
@@ -61,7 +62,7 @@ namespace ASyncFramework.Infrastructure.Persistence.MessageBroker.Configurations
             }
         }
 
-        public RabbitMQPersistent(IGetIPAddress IPAddressService, IOptionsMonitor<AppConfiguration> options,IElkLogger<RabbitMQPersistent> logger)
+        public RabbitMQPersistent(IGetIPAddress IPAddressService, IOptionsMonitor<AppConfiguration> options,IInfrastructureLogger<RabbitMQPersistent> logger)
         {
             _IPAddressService = IPAddressService;
             _logger = logger;
@@ -106,6 +107,7 @@ namespace ASyncFramework.Infrastructure.Persistence.MessageBroker.Configurations
         // pooling methods manage channel in publisher   
         public IModel Create()
         {
+            _numberOfChannel++;
             return Connection.CreateModel();
         }
         public bool Return(IModel obj)
@@ -116,6 +118,7 @@ namespace ASyncFramework.Infrastructure.Persistence.MessageBroker.Configurations
             }
             else
             {
+                _numberOfChannel--;
                 obj?.Dispose();
                 return false;
             }

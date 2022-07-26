@@ -1,10 +1,10 @@
 ﻿using ASyncFramework.Application.Common.Hashing;
-using ASyncFramework.Application.Common.Interfaces;
 using ASyncFramework.Application.PushRequestLogic;
 using ASyncFramework.Domain.Enums;
 using ASyncFramework.Domain.Interface;
+using ASyncFramework.Domain.Interface.Repository;
 using MediatR.Pipeline;
-using Microsoft.Extensions.Logging;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,17 +15,19 @@ namespace ASyncFramework.Application.Common.Behaviours
     /// </summary>
     public class LoggingBehaviour<TRequest> : IRequestPreProcessor<TRequest>
     {
-        private readonly IElkLogger<TRequest> _logger;
+        private readonly IInfrastructureLogger<TRequest> _logger;
         private readonly ICurrentUserService _currentUserService;
         private readonly IReferenceNumberService _referenceNumberService;
         private readonly IAllHeadersPerRequest _allHeadersPerRequest;
+        private readonly INotificationRepository _notificationRepository;
 
-        public LoggingBehaviour(IElkLogger<TRequest> logger, ICurrentUserService currentUserService, IReferenceNumberService referenceNumberService, IAllHeadersPerRequest allHeadersPerRequest)
+        public LoggingBehaviour(IInfrastructureLogger<TRequest> logger, ICurrentUserService currentUserService, IReferenceNumberService referenceNumberService, IAllHeadersPerRequest allHeadersPerRequest, INotificationRepository notificationRepository)
         {
             _logger = logger;
             _currentUserService = currentUserService;
             _referenceNumberService = referenceNumberService;
             _allHeadersPerRequest = allHeadersPerRequest;
+            _notificationRepository = notificationRepository;
         }
 
         public async Task Process(TRequest request, CancellationToken cancellationToken)
@@ -38,24 +40,54 @@ namespace ASyncFramework.Application.Common.Behaviours
             {
                 var obj = request as PushRequestCommand;
 
-                if (string.IsNullOrWhiteSpace(obj.TargetRequest.ContentType))
+                // set default ContentType for request 
+                if (string.IsNullOrWhiteSpace(obj.TargetRequest.TargetServiceRequest.ContentType))
                 {
-                    if (obj.TargetRequest.ServiceType == ServiceType.RESTful)
+                    if (obj.TargetRequest.TargetServiceRequest.ServiceType == ServiceType.RESTful)
                     {
-                        obj.TargetRequest.ContentType = "application/json";
+                        obj.TargetRequest.TargetServiceRequest.ContentType = "application/json";
                     }
-                    else if (obj.TargetRequest.ServiceType == ServiceType.SOAP)
+                    else if (obj.TargetRequest.TargetServiceRequest.ServiceType == ServiceType.SOAP)
                     {
-                        obj.TargetRequest.ContentType = "text/xml";
+                        obj.TargetRequest.TargetServiceRequest.ContentType = "text/xml";
                     }
                 }
 
                 // generate hash 
-                obj.HashObject = new { obj.TargetRequest?.Url, obj.TargetRequest?.ContentBody }.HashObject();
+                obj.HashObject = new { obj.TargetRequest?.TargetServiceRequest.Url, obj.TargetRequest?.TargetServiceRequest.ContentBody }.HashObject();
 
-                _logger.LogNewRequest(SystemId, request, _referenceNumberService.ReferenceNumber,
-                    _allHeadersPerRequest.Headrs, obj.HashObject,
-                    obj.TargetRequest?.Url, obj.CallBackRequest?.Url, obj.TargetRequest.ContentBody, obj.TargetRequest.ContentType);
+                string callbackUrl = string.Empty;
+                obj.CallBackRequest?.ForEach(x => callbackUrl = callbackUrl + " " + x.CallBackServiceRequest.Url);
+
+                try
+                {
+                    // insert new request in slq dataBase 
+                    long notifcationId = _notificationRepository.Add(new Domain.Entities.NotificationEntity
+                    {
+                        SystemCode = SystemId,
+                        Request = System.Text.Json.JsonSerializer.Serialize(obj),
+                        CallBackUrl = callbackUrl,
+                        CreationDate = DateTime.Now,
+                        ExtraInfo = obj.ExtraInfo,
+                        Hash = obj.HashObject,
+                        Header = System.Text.Json.JsonSerializer.Serialize(_allHeadersPerRequest.Headrs),
+                        TargetUrl = obj.TargetRequest?.TargetServiceRequest.Url,
+                        ServiceCode= _currentUserService.ServiceCode
+                    });
+                   // set refrence number at scoped register class
+                    _referenceNumberService.ReferenceNumber = notifcationId.ToString();
+
+                    // log in elk for new reuqest 
+                    _logger.LogNewRequest(CreationDate: DateTime.Now, systemId: SystemId, referenceNumber: _referenceNumberService.ReferenceNumber,
+                    headrs: _allHeadersPerRequest.Headrs, targetUrl: obj.TargetRequest?.TargetServiceRequest.Url, callBackUrl: callbackUrl,
+                   Content: obj.TargetRequest.TargetServiceRequest.ContentBody, ContentType: obj.TargetRequest.TargetServiceRequest.ContentType);
+
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(DateTime.Now,ex, MessageLifeCycle.NewRequest, _referenceNumberService.ReferenceNumber);
+                    throw;
+                }
             }
             await Task.CompletedTask;
         }

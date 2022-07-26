@@ -1,6 +1,7 @@
 ﻿using ASyncFramework.Application.Common.Models;
 using ASyncFramework.Application.Manager.MessageFailureQuery.Command.RetryFailuresLogic;
 using ASyncFramework.Domain.Interface;
+using ASyncFramework.Domain.Model.Response;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace ASyncFramework.Application.Manager.MessageFailureQuery.Command.RetrySe
 
         public async Task<Result> Handle(RetrySendCallBackFailureCommand request, CancellationToken cancellationToken)
         {
-            var isDocExist = await _CallBackFailureRepository.UpdateFaulierProcessing(request.ReferenceNumber);
+            var isDocExist = await _CallBackFailureRepository.UpdateFaulierProcessing(request.ReferenceNumber,request.TimeStampCheck);
             if (!isDocExist)
                 return new Result(false, new List<string> { "Document not found or in Processing" });
 
@@ -31,7 +32,7 @@ namespace ASyncFramework.Application.Manager.MessageFailureQuery.Command.RetrySe
             Result result;
             try
             {
-                result = await _RetryLogic.Retry(doc.Fields.Message);
+                result = await _RetryLogic.Retry(doc.Message);
             }
             catch (Exception)
             {
@@ -44,5 +45,6 @@ namespace ASyncFramework.Application.Manager.MessageFailureQuery.Command.RetrySe
     public class RetrySendCallBackFailureCommand:IRequest<Result>
     {
         public string ReferenceNumber { get; set; }
+        public byte[] TimeStampCheck { get; set; }
     }
 }

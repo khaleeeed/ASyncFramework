@@ -1,0 +1,124 @@
+﻿@{
+    ViewData["Title"] = "AddService";
+}
+
+<form id="updateQueuesConfigurationsForm" action="/QueueConfiguration/AddQueuesConfigurations" method="post">
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="m-portlet">
+                <div class="m-portlet__head">
+                    <div class="m-portlet__head-caption">
+                        <div class="m-portlet__head-title">
+                            <h3 class="m-portlet__head-text" style="color: #157c6a;font-size: 1.9rem;">
+                                اضافة خدمة
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="m-portlet__body">
+                    <div class="form-group">
+                        <label class="control-label">Service Code</label>
+                        <input class="form-control" style="width:260px" type="number" name="serviceCode" />
+                    </div>
+
+                    @if (User.IsInRole("ADMIN"))
+                    {
+                        <div class="form-group">
+                            <label class="label" style="font-size:18px">System Code</label>
+                            <div class="col-md-10">
+                                <select class="form-control" style="display:inline-block; width: 260px; height: 26px; margin-right: -12px" id="systemSelect" name="systemCode">
+                                </select>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-group">
+                        <label class="control-label">ArDiscription</label>
+                        <input class="form-control" style="width:260px" type="text" name="arDiscription" />
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="control-label">EnDiscription</label>
+                        <input class="form-control" style="width:260px" type="text" name="enDiscription" />
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="Add service" class="btn btn-brand" style="width:165px;padding-right:10px;" } />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@*status Popup*@
+<div class="modal fade" tabindex="-1" id="statusModal" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add service</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body" id="ConfirmationModalBodyDiv">
+                <p>Popup Body.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnCloseModel" class="btn btn-brand" style="" data-dismiss="modal">close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+
+<link href="~/Content/bootstrap-theme.min.css" rel="stylesheet" />
+
+@if (User.IsInRole("ADMIN"))
+{
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                type: 'GET',
+                url: '/api/systems',
+                success: function (data) {
+                    var systemName = data[0].arName;
+                    $('#systemName').val(systemName);
+                    $.each(data, function (i, item) {
+                        $('#systemSelect').append($('<option>', {
+                            value: item.intgerationCode,
+                            text: item.arName
+                        }));
+                    });
+                }
+            });
+        });
+    </script>
+}
+
+<script>
+    $("#updateQueuesConfigurationsForm").on("submit", function (e) {
+        debugger;
+        var dataString = $(this).serialize();
+        $.ajax({
+            type: "Post",
+            url: "/Service/AddService",
+            data: dataString,
+            success: function (data) {
+                debugger;
+                if (data.succeeded) {
+                    $("#ConfirmationModalBodyDiv").html("Service Add");
+                    $("#statusModal").modal("show");
+                } else {
+                    $("#ConfirmationModalBodyDiv").html(data.errors);
+                    $("#statusModal").modal("show");
+                }
+            }
+        });
+        e.preventDefault();
+    });
+</script>

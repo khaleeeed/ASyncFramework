@@ -1,5 +1,8 @@
 ﻿using ASyncFramework.Application.Common.Models;
+using ASyncFramework.Domain.Enums;
 using ASyncFramework.Domain.Interface;
+using ASyncFramework.Domain.Interface.Repository;
+using ASyncFramework.Domain.Model.Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -58,7 +61,7 @@ namespace Publisher.Filters
             context.Result = new ObjectResult(details)
             {
                 StatusCode = StatusCodes.Status500InternalServerError
-            };
+            };  
 
             context.ExceptionHandled = true;
         }
@@ -66,6 +69,10 @@ namespace Publisher.Filters
         private void HandleValidationException(ExceptionContext context)
         {
             IReferenceNumberService referenceNumber = context?.HttpContext?.RequestServices?.GetService<IReferenceNumberService>();
+
+            var repository = context?.HttpContext?.RequestServices?.GetService<INotificationRepository>();
+            repository.UpdateStatusId(referenceNumber.ReferenceNumber, MessageLifeCycle.ValidationError);
+
             var exception = context.Exception as ASyncFramework.Application.Common.Exceptions.ValidationException;
 
             var details = new Result(false, ConvertDicToList(exception.Errors))

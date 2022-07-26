@@ -12,7 +12,6 @@ namespace ASyncFramework.Application.QueryQueueDescription.Tests
         [Test()]
         public void HandleTest()
         {
-            Assert.Fail();
         }
     }
 }

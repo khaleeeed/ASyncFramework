@@ -1,0 +1,41 @@
+/* =================================================================== */
+/* Dirty Green #3b6e40
+====================================================================== */
+
+#top-line { background: #088f69; }
+#current { background-color: #088f69; border-right: 1px solid #088f69; }
+.ls-fullwidth .ls-nav-next:hover,
+.ls-fullwidth .ls-nav-prev:hover { background-color: #088f69; }
+.caption-color { background: #088f69; }
+.flexslider .flex-next:hover,
+.flexslider .flex-prev:hover { background-color: #088f69; }
+.arl.active:hover,
+.arr.active:hover { background-color: #088f69; }
+.portfolio-item:hover > figure > .item-description { border-top: 5px solid #c1a73c; }
+.highlight.color,
+.skill-bar-content { background: #088f69; }
+.dropcap,
+#breadcrumbs ul li a { color: #088f69; }
+.search-btn-widget { background-color: #088f69; }
+.tags a:hover { background: #088f69; }
+.latest-post-blog img:hover { background: #088f69; border: 1px solid #088f69; }
+.flickr-widget-blog a:hover { border: 5px solid #088f69; }
+.selected { color: #088f69 !important; }
+.filters-dropdown.active,
+#portfolio-navi a:hover { background-color: #088f69; }
+.button.gray:hover,
+.button.light:hover,
+.button.color,
+input[type="button"],
+input[type="submit"],
+input[type="button"]:focus,
+input[type="submit"]:focus { background:#088f69; }
+.tabs-nav li.active a { border-top: 1px solid #088f69; }
+.ui-accordion .ui-accordion-header-active:hover,
+.ui-accordion .ui-accordion-header-active { color: #088f69; }
+.ui-accordion-icon-active { background-color: #088f69; }
+.trigger.active a { color: #088f69; }
+.trigger.active .toggle-icon { background-color: #088f69; }
+.testimonials-author { color: #088f69; }
+.pagination .current { background: #088f69 !important; }
+.flickr-widget a:hover { border-color: #088f69; }

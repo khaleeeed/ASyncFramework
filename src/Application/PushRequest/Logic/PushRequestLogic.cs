@@ -1,9 +1,9 @@
-﻿using ASyncFramework.Application.Common.Interfaces;
-using ASyncFramework.Application.Common.Models;
+﻿using ASyncFramework.Application.Common.Models;
 using ASyncFramework.Application.PushRequestLogic;
 using ASyncFramework.Domain.Common;
 using ASyncFramework.Domain.Interface;
 using ASyncFramework.Domain.Model;
+using ASyncFramework.Domain.Model.Response;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -16,19 +16,19 @@ namespace ASyncFramework.Application.Logic
     {
         private readonly IRabbitProducers _rabbitProducers;
         private readonly IReferenceNumberService _referenceNumber;
-        private readonly Dictionary<string, QueueConfiguration> _queueConfiguration;
+        private readonly IQueueConfigurationService _queueConfiguration;
         private readonly IAllHeadersPerRequest _allHeaders;
         private readonly ICurrentUserService _currentUserService;
         public PushRequestLogic(
           IRabbitProducers rabbitProducers,
-          IOptions<Dictionary<string, QueueConfiguration>> queueConfiguration,
+          IQueueConfigurationService queueConfiguration,
           IReferenceNumberService referenceNumber=null,
             IAllHeadersPerRequest allHeaders=null,
             ICurrentUserService currentUserService=null)
         {
             _rabbitProducers = rabbitProducers;
             _referenceNumber = referenceNumber;
-            _queueConfiguration = queueConfiguration.Value;
+            _queueConfiguration = queueConfiguration;
             _allHeaders = allHeaders;
             _currentUserService = currentUserService;
         }
@@ -38,19 +38,21 @@ namespace ASyncFramework.Application.Logic
         /// </summary>
         public Task<Result> Push(PushRequestCommand request)
         {
-            QueueConfiguration queueConfiguration = _queueConfiguration[((IEnumerable<string>)request.Queues.Split(",", StringSplitOptions.None)).First()];
+            QueueConfigurations queueConfiguration = _queueConfiguration.QueueConfiguration[((IEnumerable<string>)request.Queues.Split(",", StringSplitOptions.None)).First()];
 
             Message message = new Message()
             {
-                CallBackOAuthRequest = request.CallBackOAuthRequest,
                 CallBackRequest = request.CallBackRequest,
-                TargetOAuthRequest = request.TargetOAuthRequest,
-                TargetRequest = request.TargetRequest,
+                TargetRequest = request.TargetRequest.TargetServiceRequest,
                 Queues = request.Queues,
                 Retry = queueConfiguration.QueueRetry,
                 ReferenceNumber = _referenceNumber.ReferenceNumber,
                 Headers = _allHeaders.Headrs,
-                SystemCode=_currentUserService.SystemCode
+                SystemCode=_currentUserService.SystemCode,
+                CallBackQueues=request.Queues,
+                ExtraInfo=request.ExtraInfo,
+                ServiceCode=_currentUserService.ServiceCode,
+                HasCustomQueue=request.HasCustomQueue        
             };
 
             _rabbitProducers.PushMessage(message, queueConfiguration);
@@ -66,7 +68,7 @@ namespace ASyncFramework.Application.Logic
         /// </summary>
         public Task<Result> Push(Message message)
         {
-            QueueConfiguration queueConfiguration = _queueConfiguration[((IEnumerable<string>)message.Queues.Split(",")).First()];
+            QueueConfigurations queueConfiguration = _queueConfiguration.QueueConfiguration[((IEnumerable<string>)message.Queues.Split(",")).First()];
             
             _rabbitProducers.PushMessage(message, queueConfiguration);
 

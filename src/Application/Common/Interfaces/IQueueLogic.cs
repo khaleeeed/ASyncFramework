@@ -13,5 +13,6 @@ namespace ASyncFramework.Application.Common.Interfaces
         Task Retry(Message message, int statusCode, bool isMessageCallBack = false);
         Task PushForCallBackApi(Message message, HttpResponseMessage httpResponseMessage);
         Task FailureLogic(Message message,HttpResponseMessage httpResponseMessage);
+        
     }
 }

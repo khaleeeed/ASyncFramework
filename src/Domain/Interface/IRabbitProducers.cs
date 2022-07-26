@@ -7,6 +7,6 @@ namespace ASyncFramework.Domain.Interface
 {
     public interface IRabbitProducers
     {
-        void PushMessage(Message message, QueueConfiguration queueConfiguration);
+        void PushMessage(Message message, QueueConfigurations queueConfiguration);
     }
 }

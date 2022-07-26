@@ -12,10 +12,10 @@ namespace ASyncFramework.Application.Common.Behaviours
 {
     public class UnhandledExceptionBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     {
-        private readonly IElkLogger<TRequest> _logger;
+        private readonly IInfrastructureLogger<TRequest> _logger;
         private readonly IReferenceNumberService _referenceNumberService;
 
-        public UnhandledExceptionBehaviour(IElkLogger<TRequest> logger,IReferenceNumberService referenceNumberService)
+        public UnhandledExceptionBehaviour(IInfrastructureLogger<TRequest> logger,IReferenceNumberService referenceNumberService)
         {
             _referenceNumberService = referenceNumberService;
             _logger = logger;
@@ -34,7 +34,7 @@ namespace ASyncFramework.Application.Common.Behaviours
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, MessageLifeCycle.ExceptoinWhenProcessNewRequest,_referenceNumberService.ReferenceNumber);
+                _logger.LogError(DateTime.Now,ex, MessageLifeCycle.ExceptoinWhenProcessNewRequest,_referenceNumberService.ReferenceNumber);
                 throw;
             }
         }

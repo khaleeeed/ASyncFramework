@@ -1,4 +1,5 @@
 ﻿using ASyncFramework.Domain.Documents;
+using ASyncFramework.Domain.Entities;
 using ASyncFramework.Domain.Interface;
 using ASyncFramework.Domain.Model.Response;
 using MediatR;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ASyncFramework.Application.Manager.MessageFailureQuery.Query.CallBackSystemFailuerMessagesQuery.Handler
 {
-    public class CallBackSystemFailuerMessagesQueryHandler : IRequestHandler<CallBackSystemFailuerMessagesQuery, GenericDocumentResponse<CallBackFailuerDocument>>
+    public class CallBackSystemFailuerMessagesQueryHandler : IRequestHandler<CallBackSystemFailuerMessagesQuery, GenericDocumentResponse<CallBackFailuerEntity>>
     {
         private readonly ICallBackFailureRepository _CallBackFailureRepository;
 
@@ -19,18 +20,19 @@ namespace ASyncFramework.Application.Manager.MessageFailureQuery.Query.CallBackS
             _CallBackFailureRepository = callBackFailureRepository;
         }
 
-        public async Task<GenericDocumentResponse<CallBackFailuerDocument>> Handle(CallBackSystemFailuerMessagesQuery request, CancellationToken cancellationToken)
+        public async Task<GenericDocumentResponse<CallBackFailuerEntity>> Handle(CallBackSystemFailuerMessagesQuery request, CancellationToken cancellationToken)
         {
-            (IEnumerable<CallBackFailuerDocument> doc, long total) = await _CallBackFailureRepository.GetAllFaulierDocumentBySystemCode(request.From,request.SystemCode);
+            (IEnumerable<CallBackFailuerEntity> doc, long total) = await _CallBackFailureRepository.GetAllFaulierDocumentBySystemCode(request.From,request.SystemCode);
 
-            return new GenericDocumentResponse<CallBackFailuerDocument>()
+            return new GenericDocumentResponse<CallBackFailuerEntity>()
             {
-                Document = doc,
-                Total = total
+                data = doc,
+                recordsFiltered = total,
+                recordsTotal=total
             };
         }
     }
-    public class CallBackSystemFailuerMessagesQuery : IRequest<GenericDocumentResponse<CallBackFailuerDocument>>
+    public class CallBackSystemFailuerMessagesQuery : IRequest<GenericDocumentResponse<CallBackFailuerEntity>>
     {
         public int From { get; set; }
         public string SystemCode { get; set; }

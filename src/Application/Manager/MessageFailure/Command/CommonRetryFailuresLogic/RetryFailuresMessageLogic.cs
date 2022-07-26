@@ -1,6 +1,7 @@
 ﻿using ASyncFramework.Application.Common.Models;
 using ASyncFramework.Application.Logic;
 using ASyncFramework.Domain.Model;
+using ASyncFramework.Domain.Model.Response;
 using System;
 using System.Collections.Generic;
 using System.Text;

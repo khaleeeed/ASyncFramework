@@ -12,10 +12,10 @@ namespace ASyncFramework.Infrastructure.Persistence.QueueSystem.QueueSubscriber.
     public class RunTimeQueueTests
     {
         Mock<IServiceProvider> mockServiceProvider = new Mock<IServiceProvider>();
-        Mock<IOptions<Dictionary<string, QueueConfiguration>>> mockOptions = new Mock<IOptions<Dictionary<string, QueueConfiguration>>>();
+        Mock<IOptions<Dictionary<string, QueueConfigurations>>> mockOptions = new Mock<IOptions<Dictionary<string, QueueConfigurations>>>();
         public RunTimeQueueTests()
         {
-            mockOptions.Setup(x => x.Value).Returns(new Dictionary<string, QueueConfiguration> { { "0", new QueueConfiguration {  IsAutoMapping=true} }, { "1", new QueueConfiguration { } }, { "2", new QueueConfiguration {IsAutoMapping=true } } });
+            mockOptions.Setup(x => x.Value).Returns(new Dictionary<string, QueueConfigurations> { { "0", new QueueConfigurations {  IsAutoMapping=true} }, { "1", new QueueConfigurations { } }, { "2", new QueueConfigurations {IsAutoMapping=true } } });
         }
         [Test()]
         public void RunTimeQueueTest()

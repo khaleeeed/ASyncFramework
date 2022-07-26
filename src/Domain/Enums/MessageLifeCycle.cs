@@ -6,7 +6,7 @@ namespace ASyncFramework.Domain.Enums
 {
     public enum MessageLifeCycle
     {        
-        NewRequest,     
+        NewRequest=1,     
         PushToQueue,     
         ReceiveFromQueue,        
         SendRequestToTarget,     
@@ -22,6 +22,13 @@ namespace ASyncFramework.Domain.Enums
         ExceptoinWhenProcessMessage,
         ExceptoinWhenSendTargetRequest,
         ExceptoinWhenSendCallBackRequest,
-        ValidationError
+        ValidationError,
+        SucceededWithoutCallBack,
+        FailurePushToQueue,
+        MessageDisposed,
+        ExceptoinWhenUpdateStatus,
+        ReSendRequestAfterTargetUsedAllRetries,
+        ReSendRequestAfterCallBackUsedAllRetries,
+        RePushRequest
     }
 }

@@ -1,0 +1,580 @@
+﻿@using System.Configuration;
+<!DOCTYPE html>
+<html class="loading" lang="en" data-textdirection="rtl">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+
+    <title>
+        وزارة العدل - منصة طلبات الاشعارات
+    </title>
+    <link rel="apple-touch-icon" href="~/Content/app-assets/images/ico/apple-icon-120.png">
+    <link rel="shortcut icon" type="image/x-icon" href="~/assets/demo/default/media/img/logo/favicon.ico">
+    @*<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Quicksand:300,400,500,700"
+        rel="stylesheet">*@
+    @*<link href="https://maxcdn.icons8.com/fonts/line-awesome/1.1/css/line-awesome.min.css"
+        rel="stylesheet">*@
+    <link href="~/Content/app-assets/fonts/line-awesome/css/line-awesome.min.css" rel="stylesheet" />
+
+    <!-- BEGIN VENDOR CSS-->
+    <link rel="stylesheet" type="text/css" href="~/Content/app-assets/css-rtl/vendors.css">
+    <!-- END VENDOR CSS-->
+    <!-- BEGIN MODERN CSS-->
+    <link rel="stylesheet" type="text/css" href="~/Content/app-assets/css-rtl/app.css">
+    <link rel="stylesheet" type="text/css" href="~/Content/app-assets/css-rtl/custom-rtl.css">
+    <!-- END MODERN CSS-->
+    <!-- BEGIN Page Level CSS-->
+    <link rel="stylesheet" type="text/css" href="~/Content/app-assets/css-rtl/core/menu/menu-types/vertical-menu.css">
+    <link rel="stylesheet" type="text/css" href="~/Content/app-assets/css-rtl/core/colors/palette-gradient.css">
+    <link rel="stylesheet" type="text/css" href="~/Content/app-assets/vendors/css/cryptocoins/cryptocoins.css">
+    <link rel="stylesheet" type="text/css" href="~/Content/app-assets/css-rtl/core/colors/palette-switch.css">
+    <link rel="stylesheet" type="text/css" href="~/Content/app-assets/vendors/css/forms/toggle/bootstrap-switch.min.css">
+    <link rel="stylesheet" type="text/css" href="~/Content/app-assets/vendors/css/forms/toggle/switchery.min.css">
+    <link rel="stylesheet" type="text/css" href="~/Content/app-assets/css-rtl/plugins/forms/switch.css">
+    <!-- END Page Level CSS-->
+    <!-- BEGIN Custom CSS-->
+    <link rel="stylesheet" type="text/css" href="~/Content/assets/css/style-rtl.css">
+
+    <link rel="stylesheet" type="text/css" href="~/Content/app-assets/vendors/css/forms/selects/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="~/Content/app-assets/vendors/css/tables/datatable/datatables.min.css">
+
+    <link rel="stylesheet" type="text/css" href="~/Content/app-assets/vendors/css/forms/icheck/icheck.css">
+
+    <!--begin::Page Vendors -->
+    <link href="~/assets/vendors/custom/fullcalendar/fullcalendar.bundle.css" rel="stylesheet" type="text/css" />
+    <!--RTL version:<link href="assets/vendors/custom/fullcalendar/fullcalendar.bundle.rtl.css" rel="stylesheet" type="text/css" />-->
+    <!--end::Page Vendors -->
+    <!--		<link href="assets/vendors/base/vendors.bundle.css" rel="stylesheet" type="text/css" />-->
+    <link href="~/assets/vendors/base/vendors.bundle.rtl.css" rel="stylesheet" type="text/css" />
+    <link href="~/custom css/style.bundle.rtl.css" rel="stylesheet" type="text/css" />
+    <link href="~/custom css/custom.css" rel="stylesheet" type="text/css" />
+
+    <style>
+        input[type='search'] {
+        }
+
+        * {
+            font-family: 'Quicksand', Georgia, 'Times New Roman', Times, serif;
+        }
+    </style>
+    <!-- END Custom CSS-->
+</head>
+
+<body class="m-page--fluid m--skin- m-content--skin-light2 m-header--fixed m-header--fixed-mobile m-aside-left--enabled m-aside-left--skin-light m-aside-left--fixed m-aside-left--offcanvas m-footer--push m-aside--offcanvas-default vertical-layout vertical-menu 2-columns   menu-expanded fixed-navbar"
+      data-open="click" data-menu="vertical-menu" data-col="2-columns">
+
+    <div class="m-grid m-grid--hor m-grid--root m-page">
+        <div class="m-grid__item m-grid__item--fluid m-grid m-grid--ver-desktop m-grid--desktop m-body">
+
+            <div id="m_aside_left" class="m-grid__item	m-aside-left  m-aside-left--skin-light " style=" background: url(/images//bg7.png) no-repeat center 0;">
+
+                <!-- BEGIN: Aside Menu -->
+                <div id="m_ver_menu" class="m-aside-menu  m-aside-menu--skin-light m-aside-menu--submenu-skin-light " m-menu-vertical="1" m-menu-scrollable="1" m-menu-dropdown-timeout="500" style="position: relative;">
+                    <ul class="m-menu__nav  m-menu__nav--dropdown-submenu-arrow ">
+                        <li class="m-menu__item  m-menu__item--active" aria-haspopup="true">
+                            <a href="@Url.Action("Index", "Home")" class="m-menu__link">
+                                <i class="m-menu__link-icon flaticon-line-graph"></i>
+                                <span class="m-menu__link-title">
+                                    <span class="m-menu__link-wrap">
+                                        <span class="m-menu__link-text" style="color:black">الرئيسية</span>
+                                    </span>
+                                </span>
+                            </a>
+                        </li>
+
+
+                        @if (User.IsInRole("ADMIN"))
+                        {
+                        <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true" m-menu-submenu-toggle="hover">
+                            <a href="javascript:;" class="m-menu__link m-menu__toggle">
+                                <i class="m-menu__link-icon flaticon-add"></i>
+                                <span class="m-menu__link-text" style="color:black">الطلبات الفاشلة</span>
+                                <i class="m-menu__ver-arrow la la-angle-left"></i>
+                            </a>
+                            <div class="m-menu__submenu ">
+                                <span class="m-menu__arrow"></span>
+                                <ul class="m-menu__subnav">
+                                    <li class="m-menu__item " aria-haspopup="true">
+                                        <a href="@Url.Action("Targets", "Failure")" class="m-menu__link ">
+                                            <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                                <span></span>
+                                            </i>
+                                            <span class="m-menu__link-text">جميع الطلبات الفاشلة</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="m-menu__submenu ">
+                                <span class="m-menu__arrow"></span>
+                                <ul class="m-menu__subnav">
+                                    <li class="m-menu__item " aria-haspopup="true">
+                                        <a href="@Url.Action("CallBacks", "Failure")" class="m-menu__link ">
+                                            <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                                <span></span>
+                                            </i>
+                                            <span class="m-menu__link-text">جميع الردود الفاشلة</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="m-menu__submenu ">
+                                <span class="m-menu__arrow"></span>
+                                <ul class="m-menu__subnav">
+                                    <li class="m-menu__item " aria-haspopup="true">
+                                        <a href="@Url.Action("TargetsSearchBySystem", "Failure")" class="m-menu__link ">
+                                            <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                                <span></span>
+                                            </i>
+                                            <span class="m-menu__link-text">الطلبات الفاشلة لنظام</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="m-menu__submenu ">
+                                <span class="m-menu__arrow"></span>
+                                <ul class="m-menu__subnav">
+                                    <li class="m-menu__item " aria-haspopup="true">
+                                        <a href="@Url.Action("CallBackSearchBySystem", "Failure")" class="m-menu__link ">
+                                            <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                                <span></span>
+                                            </i>
+                                            <span class="m-menu__link-text">الردود الفاشلة لنظام</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        }
+                        @if (User.IsInRole("SYSTEM"))
+                        {
+                        <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true" m-menu-submenu-toggle="hover">
+                            <a href="javascript:;" class="m-menu__link m-menu__toggle">
+                                <i class="m-menu__link-icon flaticon-add"></i>
+                                <span class="m-menu__link-text" style="color:black"> الطلبات الفاشلة</span>
+                                <i class="m-menu__ver-arrow la la-angle-left"></i>
+                            </a>
+                            <div class="m-menu__submenu ">
+                                <span class="m-menu__arrow"></span>
+                                <ul class="m-menu__subnav">
+                                    <li class="m-menu__item " aria-haspopup="true">
+                                        <a href="@Url.Action("TargetsForSystem", "Failure")" class="m-menu__link ">
+                                            <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                                <span></span>
+                                            </i>
+                                            <span class="m-menu__link-text">الطلبات الفاشلة لنظام @User.Claims.FirstOrDefault(x => x.Type == "SystemName").Value</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="m-menu__submenu ">
+                                <span class="m-menu__arrow"></span>
+                                <ul class="m-menu__subnav">
+                                    <li class="m-menu__item " aria-haspopup="true">
+                                        <a href="@Url.Action("CallBackForSystem", "Failure")" class="m-menu__link ">
+                                            <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                                <span></span>
+                                            </i>
+                                            <span class="m-menu__link-text">الردود الفاشلة لنظام @User.Claims.FirstOrDefault(x => x.Type == "SystemName").Value</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        }
+
+                    <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true" m-menu-submenu-toggle="hover">
+                        <a href="javascript:;" class="m-menu__link m-menu__toggle">
+                            <i class="m-menu__link-icon flaticon-settings"></i>
+                            <span class="m-menu__link-text" style="color:black">الخدمات و الانظمه</span>
+                            <i class="m-menu__ver-arrow la la-angle-left"></i>
+                        </a>
+                        <div class="m-menu__submenu ">
+                            <span class="m-menu__arrow"></span>
+                            <ul class="m-menu__subnav">
+                                <li class="m-menu__item " aria-haspopup="true">
+                                    <a href="@Url.Action("Index", "Service")" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">الخدمات</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="m-menu__submenu ">
+                            <span class="m-menu__arrow"></span>
+                            <ul class="m-menu__subnav">
+                                <li class="m-menu__item " aria-haspopup="true">
+                                    <a href="@Url.Action("AddService", "Service")" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">اضافة خدمة</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="m-menu__submenu ">
+                            <span class="m-menu__arrow"></span>
+                            <ul class="m-menu__subnav">
+                                <li class="m-menu__item " aria-haspopup="true">
+                                    <a href="@Url.Action("Index", "System")" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">الانظمه</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>             
+
+                    <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true" m-menu-submenu-toggle="hover">
+                        <a href="javascript:;" class="m-menu__link m-menu__toggle">
+                            <i class="m-menu__link-icon flaticon-search"></i>
+                            <span class="m-menu__link-text" style="color:black">الاستعلام عن الاشعارات</span>
+                            <i class="m-menu__ver-arrow la la-angle-left"></i>
+                        </a>
+                        <div class="m-menu__submenu ">
+                            <span class="m-menu__arrow"></span>
+                            <ul class="m-menu__subnav">
+                                <li class="m-menu__item " aria-haspopup="true">
+                                    <a href="@Url.Action("StatusMessage","MessageEnquiry")" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">الاستعلام عن حالة الارسال</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="m-menu__submenu ">
+                            <span class="m-menu__arrow"></span>
+                            <ul class="m-menu__subnav">
+                                <li class="m-menu__item " aria-haspopup="true">
+                                    <a href="@Url.Action("TargetResponse","MessageEnquiry")" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">الاستعلام عن نتيجة الطلب</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="m-menu__submenu ">
+                            <span class="m-menu__arrow"></span>
+                            <ul class="m-menu__subnav">
+                                <li class="m-menu__item " aria-haspopup="true">
+                                    <a href="@Url.Action("CallBackResponse","MessageEnquiry")" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">الاستعلام عن نتيجة رد الطلب</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="m-menu__submenu ">
+                            <span class="m-menu__arrow"></span>
+                            <ul class="m-menu__subnav">
+                                <li class="m-menu__item " aria-haspopup="true">
+                                    <a href="@Url.Action("CallBackUrlData","MessageEnquiry")" class="m-menu__link ">
+                                        <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                            <span></span>
+                                        </i>
+                                        <span class="m-menu__link-text">الاستعلام عن طريق رابط الرد</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        @if (User.IsInRole("ADMIN"))
+                        {
+                            <div class="m-menu__submenu ">
+                                <span class="m-menu__arrow"></span>
+                                <ul class="m-menu__subnav">
+                                    <li class="m-menu__item " aria-haspopup="true">
+                                        <a href="@Url.Action("ContentBodyForAdmin","MessageEnquiry")" class="m-menu__link ">
+                                            <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                                <span></span>
+                                            </i>
+                                            <span class="m-menu__link-text">الاستعلام عن طريق المحتوى</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="m-menu__submenu ">
+                                <span class="m-menu__arrow"></span>
+                                <ul class="m-menu__subnav">
+                                    <li class="m-menu__item " aria-haspopup="true">
+                                        <a href="@Url.Action("ContentBodyForSystem","MessageEnquiry")" class="m-menu__link ">
+                                            <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                                <span></span>
+                                            </i>
+                                            <span class="m-menu__link-text">الاستعلام عن طريق المحتوى</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                    </li>
+
+
+                        @if (User.IsInRole("ADMIN"))
+                        {
+                        <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true" m-menu-submenu-toggle="hover">
+                            <a href="javascript:;" class="m-menu__link m-menu__toggle">
+                                <i class="m-menu__link-icon flaticon-users"></i>
+                                <span class="m-menu__link-text" style="color:black">المستخدمين</span>
+                                <i class="m-menu__ver-arrow la la-angle-left"></i>
+                            </a>
+                            <div class="m-menu__submenu ">
+                                <span class="m-menu__arrow"></span>
+                                <ul class="m-menu__subnav">
+                                    <li class="m-menu__item " aria-haspopup="true">
+                                        <a href="@Url.Action("AddUser", "Account")" class="m-menu__link ">
+                                            <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                                <span></span>
+                                            </i>
+                                            <span class="m-menu__link-text">اضافة مستخدم</span>
+                                        </a>
+                                    </li>
+                                    <li class="m-menu__item " aria-haspopup="true">
+                                        <a href="@Url.Action("RemoveUser", "Account")" class="m-menu__link ">
+                                            <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                                <span></span>
+                                            </i>
+                                            <span class="m-menu__link-text">حذف مستخدم</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        }
+                        @if (User.IsInRole("ADMIN"))
+                        {
+                        <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true" m-menu-submenu-toggle="hover">
+                            <a href="javascript:;" class="m-menu__link m-menu__toggle">
+                                <i class="m-menu__link-icon flaticon-edit-1"></i>
+                                <span class="m-menu__link-text" style="color:black">Configurations</span>
+                                <i class="m-menu__ver-arrow la la-angle-left"></i>
+                            </a>
+                            <div class="m-menu__submenu ">
+                                <span class="m-menu__arrow"></span>
+                                <ul class="m-menu__subnav">
+                                    <li class="m-menu__item " aria-haspopup="true">
+                                        <a href="@Url.Action("QueuesConfigurations", "QueueConfiguration")" class="m-menu__link ">
+                                            <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                                <span></span>
+                                            </i>
+                                            <span class="m-menu__link-text">Queue configurations</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="m-menu__submenu ">
+                                <span class="m-menu__arrow"></span>
+                                <ul class="m-menu__subnav">
+                                    <li class="m-menu__item " aria-haspopup="true">
+                                        <a href="@Url.Action("Subscribers", "SubscriberConfiguration")" class="m-menu__link ">
+                                            <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                                <span></span>
+                                            </i>
+                                            <span class="m-menu__link-text">Subscriber configurations</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        }
+
+                        <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true" m-menu-submenu-toggle="hover">
+                            <a id="lutMessageStatus" href="javascript:;" class="m-menu__link m-menu__toggle">
+                                <i class="m-menu__link-icon flaticon-edit"></i>
+                                <span class="m-menu__link-text" style="color:black">رموز حالات الطلب</span>
+                            </a>
+                        </li>
+
+                        @*@if ("SuperManager" == "SuperManager")
+        {
+            <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true" m-menu-submenu-toggle="hover">
+                <a href="javascript:;" class="m-menu__link m-menu__toggle">
+                    <i class="m-menu__link-icon flaticon-list-1"></i>
+                    <span class="m-menu__link-text" style="color:black">التقارير</span>
+                    <i class="m-menu__ver-arrow la la-angle-left"></i>
+                </a>
+                <div class="m-menu__submenu ">
+                    <span class="m-menu__arrow"></span>
+                    <ul class="m-menu__subnav">
+                        <li class="m-menu__item " aria-haspopup="true">
+                            <a href="@Url.Action("RptTemplatesSended", "Reports")" class="m-menu__link ">
+                                <i class="m-menu__link-bullet m-menu__link-bullet--dot">
+                                    <span></span>
+                                </i>
+                                <span class="m-menu__link-text"> تقرير الاشعارات المرسلة من الانظمة </span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        }*@
+
+                    </ul>
+                </div>
+
+                <!-- END: Aside Menu -->
+            </div>
+
+            <!-- BEGIN: Left Aside -->
+            @{ Html.RenderPartial("_Header"); }
+
+            <!-- END: Left Aside -->
+
+
+
+
+            <div class="m-grid__item m-grid__item--fluid m-wrapper">
+
+                <div class="m-content">
+
+                    @RenderBody()
+
+                </div>
+            </div>
+
+
+        </div>
+        <!-- end:: Body -->
+        @*@{Html.RenderPartial("_VHeaderUsers");}*@
+        <footer class="m-grid__item		m-footer ">
+            <div class="m-container m-container--fluid m-container--full-height m-page__container">
+                <div class="m-stack m-stack--flex-tablet-and-mobile m-stack--ver m-stack--desktop">
+                    <div class="m-stack__item m-stack__item--left m-stack__item--middle m-stack__item--last">
+                        <span class="m-footer__copyright">
+                            جميع الحقوق محفوظة لدى
+                            <a href="" class="m-link">وزارة العدل</a>
+                            2019 &copy;
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    @*status Popup*@
+    <div class="modal fade" tabindex="-1" id="statusModal" data-keyboard="false" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">رموز حالات الطلب</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body" id="ConfirmationModalBodyDiv">
+                    <p>Popup Body.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btnCloseModel" class="btn btn-brand" style="" data-dismiss="modal">اغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+
+    <!-- END PAGE LEVEL JS-->
+    <!-- BEGIN PAGE VENDOR JS-->
+    <script src="~/Content/app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js"
+            type="text/javascript"></script>
+    <script src="~/Content/app-assets/vendors/js/forms/validation/jqBootstrapValidation.js"
+            type="text/javascript"></script>
+    <script src="~/Content/app-assets/vendors/js/forms/toggle/bootstrap-switch.min.js"
+            type="text/javascript"></script>
+    <script src="~/Content/app-assets/vendors/js/forms/toggle/switchery.min.js" type="text/javascript"></script>
+    <!-- END PAGE VENDOR JS-->
+
+    <script src="~/Content/app-assets/vendors/js/forms/select/select2.full.min.js" type="text/javascript"></script>
+    <script src="~/Content/app-assets/js/scripts/forms/select/form-select2.js" type="text/javascript"></script>
+
+    <!-- BEGIN PAGE VENDOR JS-->
+    <script src="~/Content/app-assets/vendors/js/charts/chart.min.js" type="text/javascript"></script>
+    <!-- END PAGE LEVEL JS-->
+
+    <script src="~/Content/app-assets/vendors/js/forms/icheck/icheck.min.js" type="text/javascript"></script>
+    <script src="~/Content/app-assets/vendors/js/forms/toggle/bootstrap-checkbox.min.js"
+            type="text/javascript"></script>
+
+    <script src="~/Content/app-assets/vendors/js/charts/jquery.sparkline.min.js" type="text/javascript"></script>
+    <!-- END PAGE VENDOR JS-->
+    <!-- BEGIN MODERN JS-->
+    <!-- BEGIN PAGE LEVEL JS-->
+    <script src="~/Content/app-assets/js/scripts/tables/components/table-components.js"
+            type="text/javascript"></script>
+    <script>
+
+        $("#lutMessageStatus").on("click", function (e) {
+            $.ajax({
+                type: "Get",
+                url: "/Home/lutMessageStatus",
+                success: function (data) {
+                    debugger;
+                    $("#ConfirmationModalBodyDiv").html(data);
+                    $("#statusModal").modal("show");
+                }
+            });
+            e.preventDefault();
+
+        });
+
+        function CopyRequestJson() {
+            var _html = document.getElementById("RequestJson").innerHTML;
+            debugger
+            var dummy = document.createElement("input");
+            document.body.appendChild(dummy);
+            dummy.setAttribute('value', _html);
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+        }
+
+        function CopyResponseJson() {
+            //var _html = document.getElementsByTagName('code')[0].innerHTML;
+            var _html = document.getElementById("ResponseJson").innerHTML;
+
+            var dummy = document.createElement("input");
+            document.body.appendChild(dummy);
+            dummy.setAttribute('value', _html);
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+        }
+    </script>
+
+
+    @*For Table*@
+    <script src="~/Content/app-assets/vendors/js/tables/jquery.dataTables.min.js"></script>
+    <link href="~/Content/app-assets/vendors/css/tables/datatable/jquery.dataTables.min.css" rel="stylesheet" />
+
+    <script>
+        //Search Table
+        $("#loginUsername").text("مرحبا : " + localStorage.getItem("Username"));
+
+    </script>
+    <script src="~/assets/vendors/base/vendors.bundle.js"></script>
+    <script src="~/assets/demo/default/base/scripts.bundle.js"></script>
+    <script src="~/assets/vendors/custom/datatables/datatables.bundle.js"></script>
+    <!--end::Page Vendors -->
+    <!--begin::Page Resources -->
+    <script src="~/assets/demo/default/custom/crud/datatables/basic/paginations.js"></script>
+    <!--end::Base Scripts -->
+    <!--begin::Page Vendors -->
+    <script src="~/assets/vendors/custom/fullcalendar/fullcalendar.bundle.js"></script>
+    <!--end::Page Vendors -->
+    <!--begin::Page Snippets -->
+    <script src="~/custom css/dashboard.js"></script>
+</body>
+</html>

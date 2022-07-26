@@ -28,11 +28,11 @@ namespace ASyncFramework.Infrastructure.Persistence.Configurations.Tests
             rabbitMQPersistent = new Mock<RabbitMQPersistent>(options.Object);
         }
 
-        [Test()]
-        public void RabbitMQPersistentTest()
-        {
-            Assert.IsFalse(rabbitMQPersistent.Object.IsConnected);
-        }
+        //[Test()]
+        //public void RabbitMQPersistentTest()
+        //{
+        //    Assert.IsFalse(rabbitMQPersistent.Object.IsConnected);
+        //}
 
         [Test()]
         public void DisposeTest()

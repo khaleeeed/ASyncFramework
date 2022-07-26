@@ -1,0 +1,37 @@
+﻿
+@model Dictionary<int,string>
+@{
+    Layout = null;
+}
+<!-- Modal -->
+<div class="row">
+    <div class="col-xl-12">
+        <div class="m-portlet">
+            <div class="m-portlet__body" style="overflow-y:scroll;height:550px">
+                <!--begin: Datatable -->
+                <table class="table table-striped- table-bordered table-hover table-checkable">
+                    <thead class="thead-light">
+                        <tr>
+                            <th style="font-size:large;text-align:center;background-color:#ccc">الرمز</th>
+                            <th style="font-size:large;text-align:center;background-color:#ccc">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                        <tr>
+                            <td>
+                                @item.Key
+                            </td>
+
+                            <td>
+                                @item.Value
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

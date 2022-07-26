@@ -1,0 +1,178 @@
+﻿
+@{
+    ViewData["Title"] = "CallBacks failure search by system";
+}
+
+<style>
+    input[type='search'] {
+    }
+
+    * {
+        font-family: 'Quicksand', Georgia, 'Times New Roman', Times, serif;
+    }
+</style>
+
+<link href="~/Content/Site.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/colreorder/1.5.2/css/colReorder.dataTables.min.css" rel="stylesheet" />
+
+<div class="row">
+    <div class="col-xl-12">
+        <div class="m-portlet">
+            <div class="m-portlet__head">
+                <div class="m-portlet__head-caption">
+                    <div class="m-portlet__head-title">
+                        <h3 class="m-portlet__head-text" style="color: #157c6a;font-size: 1.9rem;">
+                            خدمات الانظمة
+                        </h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="m-portlet__body">
+                <form class="m-form__section m-form--fit m-form--label-align-right">
+                    <div class="form-group m-form__group">
+                        <div class="form-group">
+                            <label class="label" style="font-size:18px"> النظام</label>
+                            <div class="col-md-10">
+                                <select class="form-control" style="display:inline-block; width: 260px; height: 26px; margin-right: -12px" id="systemSelect" name="systemCode">
+                                </select>
+                                <button id="btnSearch" class="btn" style="width: 100px;Background-Color:#157C6A;Color:white; margin:10px;height:30px">بـــحــــث</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divTable" style="visibility:hidden" class="row">
+    <div class="col-xl-12">
+        <div class="m-portlet">
+            <div class="m-portlet__body" style="overflow-y:scroll;height:750px;">
+                <table class="table table-striped- table-bordered table-hover table-checkable" style="text-align:center" id="myTable">
+                    <thead class="thead-light">
+                        <tr>
+                            <th class="no-sort" style="text-align:center;background-color:#ccc">
+                                <label for="Id">الكود</label>
+                            </th>
+                            <th class="no-sort" style="text-align:center;background-color:#ccc">
+                                <label for="Decription">الخدمة</label>
+                            </th>
+                            <th class="no-sort" style="text-align:center;background-color:#ccc">
+                                <label for="TemplateText">Service</label>
+                            </th>
+                            <th class="no-sort" style="text-align:center;background-color:#ccc">
+                                <label for="TemplateText">التاريخ</label>
+                            </th>                           
+                        </tr>
+                    </thead>
+                </table>        
+            </div>
+        </div>
+    </div>
+</div>
+
+@*status Popup*@
+<div class="modal fade" tabindex="-1" id="contentModal" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Content Body</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div style="word-wrap:break-word; direction:ltr;text-align:left" class="modal-body" id="contentModalBodyDiv">
+                <p>Popup Body.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnCloseStatusModel" class="btn btn-brand" style="" data-dismiss="modal">اغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script src="~/js/moment.js"></script>
+<link rel="stylesheet" type="text/css" href="~/Content/DataTables/datatables.min.css" />
+<script type="text/javascript" src="~/Content/DataTables/datatables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            type: 'GET',
+            url: '/api/systems',
+            success: function (data) {
+                var systemName = data[0].arName;
+                $('#systemName').val(systemName);
+                $.each(data, function (i, item) {
+                    $('#systemSelect').append($('<option>', {
+                        value: item.intgerationCode,
+                        text: item.arName
+                    }));
+                });
+            }
+        });
+    });
+
+    $("#btnSearch").on("click", function (e) {
+        $('#divTable').css('visibility', 'visible');
+        var table = $('#myTable').DataTable({
+            "lengthChange": false,
+            destroy:    true,
+            searching:  true,
+            processing: true,
+            serverSide: false,
+            ajax: {
+                url: "/Service/GetAllService?systemCode=" + $('#systemSelect').val(),
+                type: "get"
+            },
+            columns: [
+                { data: "serviceCode" },
+                { data: "arDiscription" },
+                { data: "enDiscription" },
+                {
+                    "render": function (data, type, row, meta) {
+                        debugger;
+                        var date = Date.parse(row.createDate);
+                        return moment(date).format('YYYY/MM/DD HH:mm');
+                    }
+                }
+            ],
+            colReorder: true
+        });
+        e.preventDefault();
+
+      
+        $('#myTable').DataTable();
+        $("input[type='search']").css({
+            'width': '768px',
+            'border': '1px solid black'
+        });
+
+        $("div.dataTables_wrapper div.dataTables_length label").css({
+            "margin-left": "587px",
+            "margin-top": "11px"
+        });
+
+        $("div.dataTables_wrapper div.dataTables_filter label").css({
+            "margin-right": "-541px"
+        });
+        $("#myTable_previous").removeClass("disabled");
+
+    });
+
+    function showModalError(id) {
+        var content = $('#myTable').DataTable().data()[id].contentBody;
+        $("#contentModalBodyDiv").html(content);
+        $("#contentModal").modal("show");
+    }
+</script>
+
+<style>
+    table, td, th {
+        border: 1px solid black;
+    }
+</style>

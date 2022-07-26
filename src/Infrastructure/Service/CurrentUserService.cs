@@ -11,10 +11,15 @@ namespace ASyncFramework.Domain.Service
     {
         public CurrentUserService(IHttpContextAccessor httpContextAccessor)
         {
-            _ = httpContextAccessor.HttpContext?.Request?.Headers?.TryGetValue("SystemCode", out Microsoft.Extensions.Primitives.StringValues user);
-            SystemCode = user;
+            _ = httpContextAccessor.HttpContext?.Request?.Headers?.TryGetValue("SystemCode", out Microsoft.Extensions.Primitives.StringValues userSystem);
+            _ = httpContextAccessor.HttpContext?.Request?.Headers?.TryGetValue("ServiceCode", out Microsoft.Extensions.Primitives.StringValues userService);
+
+            SystemCode = userSystem;
+            int.TryParse(userService,out int ServiceCode);
+            this.ServiceCode = ServiceCode;
         }
 
         public string SystemCode { get; private set; }
+        public int ServiceCode { get;  set; }
     }
 }

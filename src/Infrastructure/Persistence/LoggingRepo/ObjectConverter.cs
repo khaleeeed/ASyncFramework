@@ -75,5 +75,33 @@ namespace ASyncFramework.Infrastructure.Persistence.LoggingRepo
 
             return dataDictionary;
         }
+
+        public static Dictionary<string, string> ConvertDicToDataBaseDic(Dictionary<string, object> content, string parentName = null)
+        {
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            foreach (var item in content)
+            {
+                if (item.Value is string value)
+                {
+                    if (parentName != null)
+                        dic.Add($"{parentName}.{item.Key}", value);
+                    else
+                        dic.Add(item.Key, value);
+
+                }
+                else if (item.Value is Dictionary<string, object> dictionary)
+                {
+                    Dictionary<string, string> nestedDic;
+                    if (parentName != null)
+                        nestedDic = ConvertDicToDataBaseDic(dictionary, $"{parentName}.{item.Key}");
+                    else
+                        nestedDic = ConvertDicToDataBaseDic(dictionary, item.Key);
+
+                    dic = dic.Union(nestedDic).ToDictionary(k => k.Key, v => v.Value); ;
+                }
+            }
+            return dic;
+        }
+        
     }
 }

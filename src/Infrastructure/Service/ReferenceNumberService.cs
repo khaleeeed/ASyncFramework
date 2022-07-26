@@ -5,11 +5,18 @@ namespace ASyncFramework.Domain.Service
 {
     public class ReferenceNumberService : IReferenceNumberService
     {
-        public ReferenceNumberService()
-        {
-            ReferenceNumber = Guid.NewGuid().ToString();
-        }
 
-        public string ReferenceNumber { get; private set; }
+        private string _ReferenceNumber;
+        public string ReferenceNumber 
+        {
+            get 
+            {
+                return _ReferenceNumber ?? Guid.NewGuid().ToString();
+            } 
+            set 
+            {
+                _ReferenceNumber = value;
+            } 
+        }
     }
 }

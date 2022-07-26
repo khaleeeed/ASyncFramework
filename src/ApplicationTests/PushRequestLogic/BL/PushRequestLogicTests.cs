@@ -17,11 +17,11 @@ namespace ASyncFramework.Application.PushRequestLogic.Tests
     {
         Mock<IRabbitProducers> mockRabbitProducers = new Mock<IRabbitProducers>();
         Mock<IReferenceNumberService> mockReferenceNumberService = new Mock<IReferenceNumberService>();
-        Mock<IOptions<Dictionary<string, QueueConfiguration>>> mockOptions = new Mock<IOptions<Dictionary<string, QueueConfiguration>>>();
+        Mock<IOptions<Dictionary<string, QueueConfigurations>>> mockOptions = new Mock<IOptions<Dictionary<string, QueueConfigurations>>>();
         Mock<IAllHeadersPerRequest> mockAllHeadersPerRequest = new Mock<IAllHeadersPerRequest>();
         public PushRequestLogicTests()
         {
-            mockOptions.Setup(x => x.Value).Returns(new Dictionary<string, QueueConfiguration> { { "0", new QueueConfiguration { IsAutoMapping = true } }, { "1", new QueueConfiguration { } }, { "2", new QueueConfiguration { IsAutoMapping = true } } });
+            mockOptions.Setup(x => x.Value).Returns(new Dictionary<string, QueueConfigurations> { { "0", new QueueConfigurations { IsAutoMapping = true } }, { "1", new QueueConfigurations { } }, { "2", new QueueConfigurations { IsAutoMapping = true } } });
             mockReferenceNumberService.Setup(x => x.ReferenceNumber).Returns(Guid.NewGuid().ToString());
         }
         [Test()]

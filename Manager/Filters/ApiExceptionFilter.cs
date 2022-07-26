@@ -1,4 +1,5 @@
 ﻿using ASyncFramework.Application.Common.Models;
+using ASyncFramework.Domain.Model.Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;

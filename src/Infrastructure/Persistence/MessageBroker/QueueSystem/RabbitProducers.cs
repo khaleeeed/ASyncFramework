@@ -1,8 +1,9 @@
 ﻿using ASyncFramework.Domain.Common;
+using ASyncFramework.Domain.Enums;
 using ASyncFramework.Domain.Interface;
+using ASyncFramework.Domain.Interface.Repository;
 using ASyncFramework.Domain.Model;
 using Microsoft.Extensions.ObjectPool;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using System;
@@ -16,14 +17,20 @@ namespace ASyncFramework.Infrastructure.Persistence.MessageBroker.QueueSystem
     public class RabbitProducers : IRabbitProducers
     {
         protected readonly DefaultObjectPool<IModel> _RabbitMQPersistent;
-        private IElkLogger<RabbitProducers> _logger;
-        public RabbitProducers(IPooledObjectPolicy<IModel> rabbitMQPersistent,IElkLogger<RabbitProducers> logger)
+        private IInfrastructureLogger<RabbitProducers> _logger;
+        private readonly IPushFailuerRepository _pushFailuerRepository;
+        private readonly INotificationRepository _repository;
+
+
+        public RabbitProducers(IPooledObjectPolicy<IModel> rabbitMQPersistent,IInfrastructureLogger<RabbitProducers> logger, IPushFailuerRepository pushFailuerRepository, INotificationRepository repository)
         {
             _RabbitMQPersistent =  new DefaultObjectPool<IModel>(rabbitMQPersistent, 1500);
             _logger = logger;
+            _pushFailuerRepository = pushFailuerRepository;
+            _repository = repository;
         }
 
-        public virtual void PushMessage(Message message, QueueConfiguration queueConfiguration)
+        public virtual void PushMessage(Message message, QueueConfigurations queueConfiguration)
         {
             string msgJson = JsonConvert.SerializeObject(message);
             var body = Encoding.UTF8.GetBytes(msgJson);
@@ -38,19 +45,23 @@ namespace ASyncFramework.Infrastructure.Persistence.MessageBroker.QueueSystem
                 properties.Headers = headers;
 
                 channel.BasicPublish(exchange: queueConfiguration.ExhangeName,
-                                     routingKey: queueConfiguration.QueueName,
+                                     routingKey: message.HasCustomQueue ? $"{queueConfiguration.QueueName}_{message.SystemCode}" : queueConfiguration.QueueName,
                                      basicProperties: properties,
                                      body: body);
 
-                _logger.LogPublishing(message);
+                _logger.LogPublishing(DateTime.Now, message);
+            }
+            catch(Exception ex)
+            {
+                _pushFailuerRepository.Add(new Domain.Entities.PushFailuerEntity { CreationDate = DateTime.Now, IsActive = true, NotificationId = Convert.ToInt64(message.ReferenceNumber) });
+                _logger.LogError(DateTime.Now, ex, MessageLifeCycle.FailurePushToQueue, message.ReferenceNumber);
+                _repository.UpdateStatusId(message.ReferenceNumber, MessageLifeCycle.FailurePushToQueue);
+                throw;
             }
             finally
             {
                 _RabbitMQPersistent.Return(channel);
             }
-
-        }        
-
-
+        }
     }
 }

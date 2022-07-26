@@ -12,7 +12,6 @@ namespace ASyncFramework.Application.PushRequestLogic.Tests
         [Test()]
         public void HandleTest()
         {
-            Assert.Fail();
         }
     }
 }

@@ -15,12 +15,12 @@ namespace ASyncFramework.Application.Common.Behaviours
     public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     {
         private readonly Stopwatch _timer;
-        private readonly IElkLogger<TRequest> _logger;
+        private readonly IInfrastructureLogger<TRequest> _logger;
         private readonly ICurrentUserService _currentUserService;
         private readonly IReferenceNumberService _referenceNumberService;
 
         public PerformanceBehaviour(
-            IElkLogger<TRequest> logger, 
+            IInfrastructureLogger<TRequest> logger, 
             ICurrentUserService currentUserService,
             IReferenceNumberService referenceNumberService)
         {
@@ -48,8 +48,7 @@ namespace ASyncFramework.Application.Common.Behaviours
 
             // internal log if logger take more than 
             if (elapsedMilliseconds > 500)
-            {
-               
+            {   
                 var userId = _currentUserService.SystemCode ?? string.Empty;
 
                 _logger.LogWarning("ASyncFramework.publisher Long Running Request:- RequestName {CreationDate} {Name} ({ElapsedMilliseconds} milliseconds) {@UserId} {@Request} {ReferenceNumber}",

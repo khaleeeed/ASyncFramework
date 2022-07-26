@@ -1,0 +1,46 @@
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- master
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+
+  
+- task: DotNetCoreCLI@2
+  name: 'Restore'
+  inputs:
+    command: 'restore'
+    feedsToUse: 'select'
+- task: DotNetCoreCLI@2
+  name: 'Build'
+  inputs:
+    command: 'build'
+    
+- task: DotNetCoreCLI@2
+  name: 'Publish'
+  inputs:
+    command: 'publish'
+    publishWebProjects: false
+    projects: |
+      QuartzManager/QuartzManager.csproj
+      Manager/Manager.csproj
+      UI/UI.csproj
+      src/Publisher/Publisher.csproj
+      src/Subscriber/Subscriber.csproj
+    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)'
+    ArtifactName: 'ASyncFramework'
+    
+

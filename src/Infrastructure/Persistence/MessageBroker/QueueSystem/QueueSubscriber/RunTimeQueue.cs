@@ -1,14 +1,13 @@
 ﻿using ASyncFramework.Domain.Common;
 using ASyncFramework.Domain.Interface;
+using ASyncFramework.Domain.Interface.Repository;
 using ASyncFramework.Infrastructure.Persistence.MessageBroker.Configurations;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,19 +19,27 @@ namespace ASyncFramework.Infrastructure.Persistence.MessageBroker.QueueSystem.Qu
     // RunTimeQueue for create message from appsettings
     public class RunTimeQueue : IHostedService
     {
-        private readonly List<AutoMappingDelayQueue> _autoMappingDelayQueues = new List<AutoMappingDelayQueue>();
-
-        public RunTimeQueue(IServiceProvider serviceProvider,IOptions<Dictionary<string,QueueConfiguration>> queueConfigurations,IElkLogger<RabbitListener>logger)
+        private readonly List<AutoMappingQueue> _autoMappingDelayQueues = new List<AutoMappingQueue>();
+        public bool IsRunning { get; private set; } = true;
+        private readonly IQueueConfigurationService _QueueConfigurations;
+        private readonly IServiceProvider _ServiceProvider;
+        private readonly IInfrastructureLogger<RabbitListener> _Logger;
+        private readonly ISubscriberRepository _SubscriberRepository;
+        private readonly ISystemRepository _SystemRepository;
+        public RunTimeQueue(IServiceProvider serviceProvider,ISystemRepository systemRepository, IQueueConfigurationService queueConfigurations,IInfrastructureLogger<RabbitListener>logger, ISubscriberRepository subscriberRepository)
         {
-             var runTimeQueue = queueConfigurations.Value.Where(x => x.Value.IsAutoMapping).Select(x => x.Value);
-            foreach (var queue in runTimeQueue)
-            {
-                _autoMappingDelayQueues.Add(new AutoMappingDelayQueue(serviceProvider.GetService<IRabbitMQPersistent>(), serviceProvider.GetService<ISubscriberLogic>(), queue,logger));
-            }
+            _QueueConfigurations = queueConfigurations;
+            _ServiceProvider = serviceProvider;
+            _Logger = logger;
+            _SubscriberRepository = subscriberRepository;
+            _SystemRepository = systemRepository;
+            CreateInstance();
+            _SubscriberRepository.AddOrUpdate(true);
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
+            IsRunning = true;
             foreach (var autoMappingDelayQueue in _autoMappingDelayQueues)
             {
                 autoMappingDelayQueue.StartAsync(cancellationToken);
@@ -42,11 +49,57 @@ namespace ASyncFramework.Infrastructure.Persistence.MessageBroker.QueueSystem.Qu
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            IsRunning = false;
             foreach (var autoMappingDelayQueue in _autoMappingDelayQueues)
             {
                 autoMappingDelayQueue.StopAsync(cancellationToken);
             }
             return Task.CompletedTask;
+        }
+
+        public void ReCreateInstance()
+        {
+            CreateInstance();
+        }
+
+        private void CreateInstance()
+        {
+            _autoMappingDelayQueues.Clear();
+            // get all queues from database 
+            // is automapping == isActive 
+            IEnumerable<QueueConfigurations> runTimeQueue = _QueueConfigurations.QueueConfiguration.Where(x => x.Value.IsAutoMapping).Select(x => x.Value);
+            // create default queues
+            foreach (var queue in runTimeQueue)
+            {
+                for (int i = 0; i < queue.NumberOfInstance; i++)
+                {
+                    _autoMappingDelayQueues.Add(new AutoMappingQueue(_ServiceProvider.GetService<IRabbitMQPersistent>(), queue, _Logger, _ServiceProvider.GetService<IConfiguration>(), _ServiceProvider.GetService<INotificationRepository>(), _ServiceProvider.GetService<ISystemRepository>(), _ServiceProvider.GetService<IServiceRepository>(), _ServiceProvider.GetService<ISubscriberLogic>()));
+                }
+            }
+
+            var systems= _SystemRepository.GetAll().Result;
+            foreach (var system in systems)
+            {
+                if (system.HasCustomQueue)
+                {
+                    foreach (var queue in runTimeQueue)
+                    {
+                        var systemQueue = new QueueConfigurations
+                        {
+                            Dealy = queue.Dealy,
+                            ExhangeName = queue.ExhangeName,
+                            QueueName = $"{queue.QueueName}_{system.SystemCode}",
+                            ExhangeType=queue.ExhangeType,
+                            QueueRetry=queue.QueueRetry                            
+                        };
+                    
+                        for (int i = 0; i < queue.NumberOfInstance; i++)
+                        {
+                            _autoMappingDelayQueues.Add(new AutoMappingQueue(_ServiceProvider.GetService<IRabbitMQPersistent>(), systemQueue, _Logger, _ServiceProvider.GetService<IConfiguration>(), _ServiceProvider.GetService<INotificationRepository>(), _ServiceProvider.GetService<ISystemRepository>(), _ServiceProvider.GetService<IServiceRepository>(), _ServiceProvider.GetService<ISubscriberLogic>()));
+                        }
+                    }
+                }
+            }
         }
     }
 }

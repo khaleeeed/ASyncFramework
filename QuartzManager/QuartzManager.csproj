@@ -2,12 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>c9f52e8f-efc4-43fa-b994-f9a895aa0e95</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.35" />
     <PackageReference Include="Quartz.Plugins.RecentHistoryFork" Version="1.0.17" />
     <PackageReference Include="Quartzmin.AspNetCore" Version="1.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\src\Domain\Domain.csproj" />
+    <ProjectReference Include="..\src\Infrastructure\Infrastructure.csproj" />
+  </ItemGroup>
+ 
 
 </Project>

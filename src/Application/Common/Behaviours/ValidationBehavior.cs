@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ASyncFramework.Domain.Enums;
+using ASyncFramework.Domain.Interface.Repository;
 using FluentValidation;
 using MediatR;
 using ValidationException = ASyncFramework.Application.Common.Exceptions.ValidationException;
@@ -12,7 +14,6 @@ namespace ASyncFramework.Application.Common.Behaviours
         where TRequest : IRequest<TResponse>
     {
         private readonly IEnumerable<IValidator<TRequest>> _validators;
-
         public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
         {
             _validators = validators;

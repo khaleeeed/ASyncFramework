@@ -1,0 +1,111 @@
+﻿@model ASyncFramework.Domain.Entities.SystemEntity
+
+@{
+    ViewData["Title"] = "Update system";
+}
+
+<form id="updateQueuesConfigurationsForm" action="/QueueConfiguration/UpdateQueuesConfigurations" method="post">
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="m-portlet">
+                <div class="m-portlet__head">
+                    <div class="m-portlet__head-caption">
+                        <div class="m-portlet__head-title">
+                            <h3 class="m-portlet__head-text" style="color: #157c6a;font-size: 1.9rem;">
+                                Update System
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="m-portlet__body">        
+                    <div class="form-group">
+                        <input class="form-control" style="width:260px" value="@Model.SystemCode" type="number" name="SystemCode" hidden />
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input asp-for="HasCustomQueue" /> @Html.DisplayNameFor(model => model.HasCustomQueue)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ArSystemName" class="control-label"></label>
+                        <input class="form-control" style="width:260px" value="@Model.ArSystemName" type="text" name="ArSystemName" />
+                        <span asp-validation-for="ArSystemName" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="EnSystemName" class="control-label"></label>
+                        <input class="form-control" style="width:260px" value="@Model.EnSystemName" type="text" name="EnSystemName" />
+                        <span asp-validation-for="EnSystemName" class="text-danger"></span>
+                    </div>                   
+
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="Update system" class="btn btn-brand" style="width:165px;padding-right:10px;" } />
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @Html.ActionLink("Back to systems", "index", "system", null, new { @style = "color:black;font-size:18px;text-decoration:underline;" })
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@*status Popup*@
+<div class="modal fade" tabindex="-1" id="statusModal" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Update system</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body" id="ConfirmationModalBodyDiv">
+                <p>Popup Body.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnCloseModel" class="btn btn-brand" style="" data-dismiss="modal">close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+
+<link href="~/Content/bootstrap-theme.min.css" rel="stylesheet" />
+
+<script>
+    $("#updateQueuesConfigurationsForm").on("submit", function (e) {
+        debugger;
+        var dataString = $(this).serialize();
+        $.ajax({
+            type: "POST",
+            url: "/system/UpdateSystem",
+            data: dataString,
+            success: function (data) {
+                debugger;
+                if (data.succeeded) {
+                    $("#ConfirmationModalBodyDiv").html("system updated");
+                    $("#statusModal").modal("show");
+                } else {
+                    $("#ConfirmationModalBodyDiv").html(data.errors);
+                    $("#statusModal").modal("show");
+                }
+            }
+        });
+        e.preventDefault();
+    });
+</script>

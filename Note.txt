@@ -5,7 +5,29 @@ Infrastructure: all extranl competent service , database and message broker
 
 Project :-
 publisher:		push message to rabbitmq 
-subscriber:		resvice message from rabbitmq 
+subscriber:		background process receive message from rabbitmq 
 Manager:		api for manage UI 
 QuartzManager:	recovery job run for catch all request send when rabbitmq down 
 UI:				user inteface for manage request 
+
+server publish 
+stage : 
+application:
+10.162.1.164
+rabbitMQ:
+10.162.1.165
+
+producation:
+application:
+10.161.2.164
+10.161.2.165
+rabbitmq:
+10.161.2.166
+10.161.2.167
+
+port:
+Manager : 804
+Quartz: 805
+UI: 800 
+publisher:802
+subscriber:83

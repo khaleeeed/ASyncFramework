@@ -12,6 +12,7 @@ namespace ASyncFramework.Domain.Interface
         Task<object> GetCallBackResponse(string referenceNumber, int from);
         Task<object> GetTargetResponse(string referenceNumber, int from);
         Task<object> GetMessageFromCallBackUrl(string CallBackUrl, int from);
-        (bool IsSendBefore, string ReferenceNumber) CheckIfRequestSendBefore(string hash);
+        Task<object> GetMessageByContentBodyForAdmin(string fieldName, string fieldValue, int from);
+        Task<object> GetMessageByContentBodyForSystem(string fieldName, string fieldValue, int from, string systemCode);
     }
 }

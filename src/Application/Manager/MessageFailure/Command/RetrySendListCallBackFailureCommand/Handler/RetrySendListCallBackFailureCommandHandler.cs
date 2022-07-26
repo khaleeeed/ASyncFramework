@@ -1,6 +1,7 @@
 ﻿using ASyncFramework.Application.Common.Models;
 using ASyncFramework.Application.Manager.MessageFailureQuery.Command.RetryFailuresLogic;
 using ASyncFramework.Domain.Interface;
+using ASyncFramework.Domain.Model.Response;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -25,9 +26,9 @@ namespace ASyncFramework.Application.Manager.MessageFailureQuery.Command.RetrySe
 
         public async Task<Result> Handle(RetrySendListCallBackFailuresCommand request, CancellationToken cancellationToken)
         {
-            var isDocExist = await _CallBackFailureRepository.UpdateFaulierProcessing(request.ReferenceNumbers);
-            if (!isDocExist)
-                return new Result(false, new List<string> { "Document not found or in Processing" });
+            var isDocUpdated = await _CallBackFailureRepository.UpdateFaulierProcessing(request.ReferenceNumbers,request.TimeStampChecks);
+            if (isDocUpdated != null)
+                return new Result(false, new List<string> { $"Document {isDocUpdated} in Processing please refresh page" });
 
             List<string> erros = null;
             Result result = new Result(true, null);
@@ -40,7 +41,7 @@ namespace ASyncFramework.Application.Manager.MessageFailureQuery.Command.RetrySe
                     continue;
                 try
                 {
-                    _ = await _RetryLogic.Retry(doc.Fields.Message);
+                    _ = await _RetryLogic.Retry(doc.Message);
                 }
                 catch (Exception ex)
                 {
@@ -56,5 +57,6 @@ namespace ASyncFramework.Application.Manager.MessageFailureQuery.Command.RetrySe
     public class RetrySendListCallBackFailuresCommand : IRequest<Result>
     {
         public List<string> ReferenceNumbers { get; set; }
+        public List<byte[]> TimeStampChecks { get; set; }
     }
 }

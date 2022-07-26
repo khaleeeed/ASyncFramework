@@ -1,4 +1,5 @@
 ﻿using ASyncFramework.Domain.Documents;
+using ASyncFramework.Domain.Entities;
 using ASyncFramework.Domain.Interface;
 using ASyncFramework.Domain.Model.Response;
 using MediatR;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ASyncFramework.Application.Manager.MessageFailureQuery.Query.CallBackFailuerMessagesQuery.Handler
 {
-    public class CallBackFailuerMessagesQueryHandler : IRequestHandler<CallBackFailuerMessagesQuery, GenericDocumentResponse<CallBackFailuerDocument>>
+    public class CallBackFailuerMessagesQueryHandler : IRequestHandler<CallBackFailuerMessagesQuery, GenericDocumentResponse<CallBackFailuerEntity>>
     {
         private readonly ICallBackFailureRepository _CallBackFailureRepository;
 
@@ -19,18 +20,19 @@ namespace ASyncFramework.Application.Manager.MessageFailureQuery.Query.CallBackF
             _CallBackFailureRepository = callBackFailureRepository;
         }
 
-        public async Task<GenericDocumentResponse<CallBackFailuerDocument>> Handle(CallBackFailuerMessagesQuery request, CancellationToken cancellationToken)
+        public async Task<GenericDocumentResponse<CallBackFailuerEntity>> Handle(CallBackFailuerMessagesQuery request, CancellationToken cancellationToken)
         {
-            (IEnumerable<CallBackFailuerDocument> doc, long total) = await _CallBackFailureRepository.GetAllFaulierDocument(request.From);
+            (IEnumerable<CallBackFailuerEntity> doc, long total) = await _CallBackFailureRepository.GetAllFaulierDocument(request.From);
             
-            return new GenericDocumentResponse<CallBackFailuerDocument>()
+            return new GenericDocumentResponse<CallBackFailuerEntity>()
             {
-                Document = doc,
-                Total=total
+                data = doc,
+                recordsTotal=total,
+                recordsFiltered=total
             };
         }
     }
-    public class CallBackFailuerMessagesQuery : IRequest<GenericDocumentResponse<CallBackFailuerDocument>>
+    public class CallBackFailuerMessagesQuery : IRequest<GenericDocumentResponse<CallBackFailuerEntity>>
     {
         public int From { get; set; }
     }

@@ -1,0 +1,207 @@
+﻿
+@{
+    ViewData["Title"] = "Targets failure";
+}
+
+<style>
+    input[type='search'] {
+    }
+
+    * {
+        font-family: 'Quicksand', Georgia, 'Times New Roman', Times, serif;
+    }
+</style>
+
+<link href="~/Content/Site.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/colreorder/1.5.2/css/colReorder.dataTables.min.css" rel="stylesheet" />
+
+<div class="row">
+    <div class="col-xl-12">
+        <div class="m-portlet">
+            <div class="m-portlet__head">
+                <div class="m-portlet__head-caption">
+                    <div class="m-portlet__head-title">
+                        <h3 class="m-portlet__head-text" style="color: #157c6a;font-size: 1.9rem;">
+                            جميع الطلبات الفاشلة
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divTable" class="row">
+    <div class="col-xl-12">
+        <div class="m-portlet">
+            <div class="m-portlet__body" style="overflow-y:scroll;height:750px;">
+                <table class="table table-striped- table-bordered table-hover table-checkable" style="text-align:center" id="myTable">
+                    <thead class="thead-light">
+                        <tr>
+                            <th class="no-sort" style="text-align:center;background-color:#ccc">
+                                <label for="Id">الرقم المرجعي</label>
+                            </th>
+                            <th class="no-sort" style="text-align:center;background-color:#ccc">
+                                <label for="Decription">رابط الرد</label>
+                            </th>
+                            <th class="no-sort" style="text-align:center;background-color:#ccc">
+                                <label for="TemplateText">التاريخ</label>
+                            </th>
+                            <th class="no-sort" style="text-align:center;background-color:#ccc">
+                                <label for="TemplateText">كود الحالة</label>
+                            </th>
+                            <th class="no-sort" style="text-align:center;background-color:#ccc">
+                                <label for="TemplateText">عدد مرات المحاولة</label>
+                            </th>
+                            <th class="no-sort" style="text-align:center;background-color:#ccc">
+                                المحتوى
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
+                <br />
+                <div>
+                    <button style="float:left" class="btn-success btn-lg" id="sendRequestBtn">اعادة ارسال الطلبات</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*status Popup*@
+<div class="modal fade" tabindex="-1" id="exModal" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Content body</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <pre style="word-wrap:break-word; direction:ltr;text-align:left" class="modal-body" id="exModalBodyDiv">
+                <p>Popup Body.</p>
+            </pre>
+            <div class="modal-footer">
+                <button type="button" id="btnCloseStatusModel" class="btn btn-brand" style="" data-dismiss="modal">اغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script src="~/js/moment.js"></script>
+<link rel="stylesheet" type="text/css" href="~/Content/DataTables/datatables.min.css" />
+<script type="text/javascript" src="~/Content/DataTables/datatables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        var table = $('#myTable').DataTable({
+            dom: 'Blfrtip',
+            buttons: [
+                'selectAll',
+                'selectNone'
+            ],
+            language: {
+                buttons: {
+                    selectAll: "Select all items",
+                    selectNone: "Select none"
+                }
+            },
+            "lengthChange": false,
+            destroy: true,
+            searching: false,
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "/Failure/GetTargets",
+                type: "get"
+            },
+            columns: [
+                { data: "notificationId" },
+                { data: "callBackUrl" },
+                {
+                    "render": function (data, type, row, meta) {
+                        var date = Date.parse(row.creationDate);
+                        return moment(date).format('YYYY/MM/DD HH:mm');
+                    }
+                },
+                { data: "statusCode" },
+                { data:"retry"},
+                {
+                    "render": function (data, type, row, meta) {
+                        if (row.contentBody != null)
+                            return '<button onclick="showModalError(' + meta.row + ')" class="btn-info">Content</button>';
+
+                        return '-';
+                    }
+                }
+            ],
+            colReorder: true
+        });
+
+        $('#myTable tbody').on('click', 'tr', function () {
+            $(this).toggleClass('selected');
+        });
+
+        $('#sendRequestBtn').click(function () {
+            debugger;
+            var referenceNumbers = [];
+            var timeStampChecks = [];
+            var data = table.rows('.selected').data();
+            for (var i = 0; i < data.length; i++) {
+                referenceNumbers.push(data[i].notificationId);     
+                timeStampChecks.push(data[i].timeStampCheck); 
+            }
+            var command = { referenceNumbers, timeStampChecks };
+
+            $.ajax({
+                type: "POST",
+                url: "/Failure/SendRetryRequest",
+                data: { command: command},
+                success: function (data) {
+                    debugger;
+                    if (data.succeeded) {
+                        $('#myTable').DataTable().ajax.reload(null, false);
+                        
+                    } else {
+                        $("#exModalBodyDiv").html(data.errors);
+                        $("#exModal").modal("show");
+                    }
+                }
+            });
+            
+        });
+
+        $('#myTable').DataTable();
+        $("input[type='search']").css({
+            'width': '768px',
+            'border': '1px solid black'
+        });
+
+        $("div.dataTables_wrapper div.dataTables_length label").css({
+            "margin-left": "587px",
+            "margin-top": "11px"
+        });
+
+        $("div.dataTables_wrapper div.dataTables_filter label").css({
+            "margin-right": "-541px"
+        });
+
+        $("#myTable_previous").removeClass("disabled");
+
+    });
+
+    function showModalError(id) {
+        var ex = $('#myTable').DataTable().data()[id].contentBody;
+        $("#exModalBodyDiv").html(ex);
+        $("#exModal").modal("show");
+    }    
+</script>
+
+<style>
+    table, td, th {
+        border: 1px solid black;
+    }
+</style>

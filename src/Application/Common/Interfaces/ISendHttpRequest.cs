@@ -9,8 +9,7 @@ namespace ASyncFramework.Application.Common.Interfaces
 {
     public interface ISendHttpRequest
     {
-        Task<HttpResponseMessage> SendRequest(Message message, Task<Task> taskGetToken);
-        Task GetToken(Task<HttpRequestMessage> taskHttpRequestMessage);
+        Task<HttpResponseMessage> SendRequest(Message message);
 
     }
 }

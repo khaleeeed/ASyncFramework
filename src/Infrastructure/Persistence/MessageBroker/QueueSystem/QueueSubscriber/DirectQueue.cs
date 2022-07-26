@@ -1,12 +1,16 @@
 ﻿using ASyncFramework.Domain.Common;
 using ASyncFramework.Domain.Interface;
+using ASyncFramework.Domain.Interface.Repository;
 using ASyncFramework.Domain.Model;
 using ASyncFramework.Infrastructure.Persistence.MessageBroker.Configurations;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,20 +26,23 @@ namespace ASyncFramework.Infrastructure.Persistence.MessageBroker.QueueSystem.Qu
         protected override string ExchangeType => "direct";
         protected override Dictionary<string, object> ExchangeArgu => null;
         protected override string QueueName => "DirectQueue";
-       
-        private readonly ISubscriberLogic _subscriberLogic;
-        public DirectQueue(IRabbitMQPersistent rabbitMQPersistent, ISubscriberLogic subscriberLogic,IElkLogger<RabbitListener>logger) : base(rabbitMQPersistent,logger)
+        private readonly ISubscriberLogic _SubscriberLogic;
+        
+        public DirectQueue(IRabbitMQPersistent rabbitMQPersistent,IInfrastructureLogger<RabbitListener>logger,IConfiguration configuration,INotificationRepository notificationRepository, ISystemRepository systemRepository, IServiceRepository serviceRepository, ISubscriberLogic subscriberLogic) : base(rabbitMQPersistent,logger,configuration,notificationRepository,serviceRepository,systemRepository)
         {
-            _subscriberLogic = subscriberLogic;
             _RabbitMQPersistent.ConnectionName = ExchangeName;
-
+            _SubscriberLogic = subscriberLogic;
         }
 
-        public override async Task<bool> Process(string content)
+        public override async Task<bool> Process(Message message)
         {
-            var message = Newtonsoft.Json.JsonConvert.DeserializeObject<Message>(content);
-            await _subscriberLogic.Subscribe(message);
+            await _SubscriberLogic.Subscribe(message);
             return true;
+        }
+
+        public override async Task InternalExceptionRetry(Message message)
+        {
+            await _SubscriberLogic.InternalExceptionRetry(message);
         }
     }
 }

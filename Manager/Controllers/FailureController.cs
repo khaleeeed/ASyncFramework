@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using ASyncFramework.Application.Common.Models;
+﻿using System.Threading.Tasks;
 using ASyncFramework.Application.Manager.MessageFailureQuery.Command.RetrySendCallBackFailuresCommand.Handler;
 using ASyncFramework.Application.Manager.MessageFailureQuery.Command.RetrySendListCallBackFailureCommand.Handler;
 using ASyncFramework.Application.Manager.MessageFailureQuery.Command.RetrySendListTargetFailuresCommand.Handler;
@@ -9,8 +7,9 @@ using ASyncFramework.Application.Manager.MessageFailureQuery.Query.CallBackFailu
 using ASyncFramework.Application.Manager.MessageFailureQuery.Query.CallBackSystemFailuerMessagesQuery.Handler;
 using ASyncFramework.Application.Manager.MessageFailureQuery.Query.TargetFailuerMessagesQuery.Handler;
 using ASyncFramework.Application.Manager.MessageFailureQuery.Query.TargetSystemFailuerMessagesQuery.Handler;
-using ASyncFramework.Domain.Documents;
+using ASyncFramework.Domain.Entities;
 using ASyncFramework.Domain.Model.Response;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Manager.Controllers
@@ -20,14 +19,15 @@ namespace Manager.Controllers
     public class FailureController : ApiController
     {
         /// <summary>
-        /// Get all target failuer message 
+        /// Get all target failure message 
         /// </summary>
         [HttpGet("target/messages")]
-        public async Task<ActionResult<GenericDocumentResponse<TargetFailuerDocument>>> GetTarget(int from)
+        [Authorize(Roles = "ADMIN")]
+        public async Task<ActionResult<GenericDocumentResponse<TargetFailuerEntity>>> GetTarget(int from)
         {
             var response = await Mediator.Send(new TargetFailuerMessagesQuery { From = from });
 
-            if (response.Document == null)
+            if (response.data == null)
             {
                 response.Message = "No Document found";
                 return NotFound(response);
@@ -37,14 +37,15 @@ namespace Manager.Controllers
         }
 
         /// <summary>
-        /// Get all taget failuer message for system  
+        /// Get all target failure message for system   
         /// </summary>
         [HttpGet("target/messages/systemcode/{systemCode}")]
-        public async Task<ActionResult<GenericDocumentResponse<TargetFailuerDocument>>> GetTarget(string systemCode, int from)
+        [Authorize(Roles = "ADMIN,SYSTEM")]
+        public async Task<ActionResult<GenericDocumentResponse<TargetFailuerEntity>>> GetTarget(string systemCode, int from)
         {
             var response = await Mediator.Send(new TargetSystemFailuerMessagesQuery { From = from, SystemCode = systemCode });
 
-            if (response.Document == null)
+            if (response.data == null)
             {
                 response.Message = "No Document found";
                 return NotFound(response);
@@ -54,14 +55,15 @@ namespace Manager.Controllers
         }
 
         /// <summary>
-        /// Get all call back failuer
+        /// Get all call back failure
         /// </summary>     
         [HttpGet("callback/messages")]
-        public async Task<ActionResult<GenericDocumentResponse<CallBackFailuerDocument>>> GetCallback(int from)
+        [Authorize(Roles = "ADMIN")]
+        public async Task<ActionResult<GenericDocumentResponse<CallBackFailuerEntity>>> GetCallback(int from)
         {
             var response = await Mediator.Send(new CallBackFailuerMessagesQuery { From = from });
 
-            if (response.Document == null)
+            if (response.data == null)
             {
                 response.Message = "No Document found";
                 return NotFound(response);
@@ -71,14 +73,15 @@ namespace Manager.Controllers
         }
 
         /// <summary>
-        /// Get all call back failuer
+        /// Get all call back failure
         /// </summary>                        
         [HttpGet("callback/messages/systemcode/{systemCode}")]
-        public async Task<ActionResult<GenericDocumentResponse<CallBackFailuerDocument>>> GetCallback(string systemCode, int from)
+        [Authorize(Roles = "ADMIN,SYSTEM")]
+        public async Task<ActionResult<GenericDocumentResponse<CallBackFailuerEntity>>> GetCallback(string systemCode, int from)
         {
-            var response = await Mediator.Send(new CallBackSystemFailuerMessagesQuery { From = from,SystemCode = systemCode });
+            var response = await Mediator.Send(new CallBackSystemFailuerMessagesQuery { From = from, SystemCode = systemCode });
 
-            if (response.Document == null)
+            if (response.data == null)
             {
                 response.Message = "No Document found";
                 return NotFound(response);
@@ -89,9 +92,10 @@ namespace Manager.Controllers
         }
 
         /// <summary>
-        /// Retry send target failuer
+        /// Retry send target failure
         /// </summary>
         [HttpPost("target")]
+        [Authorize(Roles = "ADMIN,SYSTEM")]
         public async Task<ActionResult<Result>> PostTarget(string referenceNumber)
         {
             var response = await Mediator.Send(new RetrySendTargetFailureCommand { ReferenceNumber = referenceNumber });
@@ -105,12 +109,13 @@ namespace Manager.Controllers
         }
 
         /// <summary>
-        /// Retry send list of target failuer
+        /// Retry send list of target failure
         /// </summary>
         [HttpPost("/api/failures/target")]
-        public async Task<ActionResult<Result>> PostTarget(List<string> refrenceNumbers)
+        [Authorize(Roles = "ADMIN,SYSTEM")]
+        public async Task<ActionResult<Result>> PostTarget(RetrySendListTargetFailuresCommand refrenceNumbers)
         {
-            var response = await Mediator.Send(new RetrySendListTargetFailuresCommand { ReferenceNumbers = refrenceNumbers });
+            var response = await Mediator.Send(refrenceNumbers);
 
             if (response.Succeeded == false)
             {
@@ -121,28 +126,14 @@ namespace Manager.Controllers
         }
 
         /// <summary>
-        /// Retry send list of callback failuer
+        /// Retry send list of callback failure
         /// </summary>
         [HttpPost("callback")]
+        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "SYSTEM")]
         public async Task<ActionResult<Result>> PostCallback(string referenceNumber)
         {
-            var response = await Mediator.Send(new RetrySendCallBackFailureCommand { ReferenceNumber=referenceNumber});
-
-            if (response.Succeeded == false)
-            {                
-                return NotFound(response);
-            }
-
-            return response;
-        }
-
-        /// <summary>
-        /// Retry send list of callback failuer
-        /// </summary>
-        [HttpPost("/api/failures/callback")]
-        public async Task<ActionResult<Result>> PostCallback(List<string> refrenceNumbers)
-        {
-            var response = await Mediator.Send(new RetrySendListCallBackFailuresCommand { ReferenceNumbers=refrenceNumbers });
+            var response = await Mediator.Send(new RetrySendCallBackFailureCommand { ReferenceNumber = referenceNumber });
 
             if (response.Succeeded == false)
             {
@@ -150,6 +141,23 @@ namespace Manager.Controllers
             }
 
             return response;
-        }      
+        }
+
+        /// <summary>
+        /// Retry send list of callback failure
+        /// </summary>
+        [HttpPost("/api/failures/callback")]
+        [Authorize(Roles = "ADMIN,SYSTEM")]
+        public async Task<ActionResult<Result>> PostCallback(RetrySendListTargetFailuresCommand command)
+        {
+            var response = await Mediator.Send(new RetrySendListCallBackFailuresCommand { ReferenceNumbers = command.ReferenceNumbers, TimeStampChecks = command.TimeStampChecks });
+
+            if (response.Succeeded == false)
+            {
+                return NotFound(response);
+            }
+
+            return response;
+        }
     }
 }

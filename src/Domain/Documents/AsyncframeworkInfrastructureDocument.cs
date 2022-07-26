@@ -8,7 +8,10 @@ namespace ASyncFramework.Domain.Documents
 {
     [DataContract(Name = "asyncframework-infrastructure-*")]
     public class AsyncframeworkInfrastructureDocument
-    {           
+    {
+        private string exceptions;
+        [DataMember(Name = "exceptions")]
+        public object Exceptions { get { return exceptions; } set { exceptions = System.Text.Json.JsonSerializer.Serialize(value); } }
         [DataMember(Name ="level")]
         public string Level { get; set; }
         [DataMember(Name = "fields")]
@@ -44,5 +47,7 @@ namespace ASyncFramework.Domain.Documents
         public DateTime CreationDate { get; set; }
         [DataMember(Name = "Hash")]
         public string Hash { get; set; }
+        [DataMember(Name = "ContentBody")]
+        public object ContentBody { get; set; }
     }
 }

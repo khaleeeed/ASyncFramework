@@ -9,11 +9,11 @@ using System.Text;
 namespace ASyncFramework.Infrastructure.Persistence
 {
     public class GetIPAddress: IGetIPAddress
-    {
+    {        
         public GetIPAddress(IHttpContextAccessor httpContextAccessor)
         {
             if (httpContextAccessor.HttpContext != null)
-            {
+            { 
                 var connections = httpContextAccessor.HttpContext.Features.Get<IHttpConnectionFeature>();
                 LocalIpAddress = $"{connections.LocalIpAddress}:{connections.LocalPort}";
                 RemoteIpAddress = $"{connections.RemoteIpAddress}:{connections.LocalPort}";
@@ -21,7 +21,7 @@ namespace ASyncFramework.Infrastructure.Persistence
             else
             {
                 var addlist = Dns.GetHostEntry(Dns.GetHostName());
-                LocalIpAddress= addlist.AddressList[0].ToString();
+                LocalIpAddress= addlist.AddressList[1].ToString();
             }
 
         }

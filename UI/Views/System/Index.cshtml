@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "Systems";
+}
+
+<style>
+    input[type='search'] {
+    }
+
+    * {
+        font-family: 'Quicksand', Georgia, 'Times New Roman', Times, serif;
+    }
+</style>
+
+<link href="~/Content/Site.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/colreorder/1.5.2/css/colReorder.dataTables.min.css" rel="stylesheet" />
+
+<div class="row">
+    <div class="col-xl-12">
+        <div class="m-portlet">
+            <div class="m-portlet__head">
+                <div class="m-portlet__head-caption">
+                    <div class="m-portlet__head-title">
+                        <h3 class="m-portlet__head-text" style="color: #157c6a;font-size: 1.9rem;">
+                            Systems
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divTable" class="row">
+    <div class="col-xl-12">
+        <div class="m-portlet">
+            <div class="m-portlet__body" style="overflow-y:scroll;height:750px;">
+                <table class="table table-striped- table-bordered table-hover table-checkable" style="text-align:center" id="myTable">
+                    <thead class="thead-light">
+                        <tr>
+                            <th style="text-align:center;background-color:#ccc">
+                                <label for="Id">System code</label>
+                            </th>
+                            <th style="text-align:center;background-color:#ccc">
+                                <label for="Decription">System english Name</label>
+                            </th>
+                            <th style="text-align:center;background-color:#ccc">
+                                <label for="TemplateText">System arabic name</label>
+                            </th>
+                            <th style="text-align:center;background-color:#ccc">
+                                <label for="TemplateText">Has custom queue</label>
+                            </th>                
+                        </tr>
+                    </thead>
+                </table>
+                <br />
+                <div>
+                    <button style="float:left" class="btn-info btn-lg" id="sendRequestBtn">Add or update system</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script src="~/js/moment.js"></script>
+<link rel="stylesheet" type="text/css" href="~/Content/DataTables/datatables.min.css" />
+<script type="text/javascript" src="~/Content/DataTables/datatables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        var table = $('#myTable').DataTable({
+            "oLanguage": {
+                "sSearch": "Quick Search:"
+            },
+            select: {
+                style: 'single'
+            },
+            "lengthChange": false,
+            destroy: true,
+            searching: true,
+            processing: true,
+            serverSide: false,
+            ajax: {
+                url: "/System/GetAllSystem",
+                type: "get"
+            },
+            columns: [
+                { data: "systemCode" },
+                { data: "enSystemName" },
+                { data: "arSystemName" },
+                { data: "hasCustomQueue" }
+            ],
+            colReorder: true
+        });
+
+        $('#sendRequestBtn').click(function () {
+            debugger;
+
+            var data = table.rows('.selected').data();
+            if (data.length == 0) {
+                window.location.href = '/system/AddSystem';
+            }
+            else {
+                var command = data[0];
+
+                window.location.href = '/system/UpdateSystem?systemCode=' + command.systemCode;
+            }
+
+
+        });
+
+        $('#myTable').DataTable();
+        $("input[type='search']").css({
+            'width': '768px',
+            'border': '1px solid black'
+        });
+
+        $("div.dataTables_wrapper div.dataTables_length label").css({
+            "margin-left": "587px",
+            "margin-top": "11px"
+        });
+
+        $("div.dataTables_wrapper div.dataTables_filter label").css({
+            "margin-right": "-541px"
+        });
+
+        $("#myTable_previous").removeClass("disabled");
+
+    });
+
+</script>
+
+<style>
+    table, td, th {
+        border: 1px solid black;
+    }
+</style>

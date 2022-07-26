@@ -1,0 +1,110 @@
+﻿
+/*}
+
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+input,
+select,
+textarea {
+    max-width: 280px;
+}**/
+
+
+.checkCenter {
+    text-align: center
+}
+
+.checkOrder {
+    margin-right: 32px;
+}
+
+.theadStyle {
+    font-size: 15px;
+    font-weight: bold;
+    background-color: #ccc;
+    text-align: center
+}
+
+.field-validation-error {
+    color:red;
+}
+
+.input[type='search'] {
+    width: 700px;
+    background-color: pink;
+    border: 1px solid black;
+}
+
+
+.no-sort::after {
+    display: none !important;
+}
+
+.no-sort {
+    pointer-events: none !important;
+    cursor: default !important;
+}
+
+
+.validationStyle {
+    margin-right: 530px;
+    /*background-color: #ffff86;*/
+    width: 658px;
+    /*border: 1px solid black;*/
+    text-align: left;
+}
+
+thead {
+    display: table-header-group;
+}
+
+tfoot {
+    display: table-row-group;
+}
+
+tr {
+    page-break-inside: avoid;
+}
+/*.logostyle {
+    margin-left: 549px;
+    height: 224px;
+    padding-bottom: 44px;
+    margin-top: 30px;
+}
+
+.centerlogo {
+    margin-left: 420px;
+    height: 125px;
+}
+
+.leftlogo {
+    margin-left: 94px;
+}*/
+
+.systemname {
+    margin-left: 735px;
+    margin-top: -54px;
+    padding-bottom: 11px;
+    font-size: 32px;
+}
+
+.formdata {
+    font-size: 18px;
+    display: inline;
+    margin-left: 1135px;
+}
+
+.todate {
+    font-size: 18px;
+    display: inline;
+    margin-left: 486px;
+}
+
+.period {
+    margin-right: 777px;
+    font-size: large;
+    padding-bottom: 25px;
+}

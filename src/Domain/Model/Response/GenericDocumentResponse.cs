@@ -6,10 +6,13 @@ namespace ASyncFramework.Domain.Model.Response
 {
     public class GenericDocumentResponse<T>
     {
-        public IEnumerable<T> Document { get; set; }
-
-        public long Total { get; set; }
-
+        public long recordsTotal { get; set; }
+        public long recordsFiltered { get; set; }
+        public IEnumerable<T> data { get; set; }   
+        
         public string Message { get; set; }
     }
 }
+
+
+

@@ -1,0 +1,693 @@
+﻿<link href="~/Content/Custom/jquery-ui.css" rel="stylesheet" />
+<script src="~/Content/Custom/jquery-ui.js"></script>
+<script src="~/Content/app-assets/js/core/libraries/jquery.min.js"></script>
+<script src="~/Content/Custom/jquery-ui.js"></script>
+
+<style>
+    .pull-up {
+        background-color: #fbfbfb;
+    }
+
+    .garage-title {
+        clear: both;
+        display: inline-block;
+        white-space: nowrap;
+    }
+</style>
+<section id="constructor">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+
+                    <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
+                    <div class="heading-elements">
+                        <ul class="list-inline mb-0">
+                            <li><a data-action="collapse"><i class="ft-minus"></i></a></li>
+                            <li><a data-action="expand"><i class="ft-maximize"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-content collapse show">
+
+                    <div class="card-body card-dashboard">
+
+                        @if (User.IsInRole("ADMIN"))
+                        {
+                        <div class="form form-horizontal striped-rows form-bordered">
+                            <div class="form-body">
+                                <h4 class="form-section"><i class="ft-filter"></i> فلترة</h4>
+                                <div class="form-group row">
+
+                                    <label class="col-md-1 label-control">النظام</label>
+                                    <div class="col-md-3">
+                                        <select class="form-control" style="display:inline-block;   margin-right: -12px" id="systemSelect" name="systemCode">
+                                        </select>
+                                    </div>
+
+                                    <label class="col-md-1 label-control">الخدمات</label>
+                                    <div class="col-md-3">
+                                        <select class="form-control" style="display:inline-block;  margin-right: -12px" id="serviceSelect" name="systemCode">
+                                        </select>
+                                    </div>
+
+                                    <br />
+                                    <br />
+                                    <br />
+
+                                    <div class="col-md-4"></div>
+                                    <label class="col-md-1 label-control">من تاريخ</label>
+                                    <div class="col-md-3">
+                                        <input type="text" id="fromDatePciker" readonly class="form-control new-date" value="@DateTime.Now.AddMonths(-3)" name="MainDashBoardFilter.FromDate" />
+                                    </div>
+
+                                    <br />
+                                    <br />
+                                    <br />
+
+                                    <label class="col-md-1 label-control">إلى تاريخ</label>
+                                    <div class="col-md-3">
+                                        <input type="text" id="toDatePicker" class="form-control new-date" readonly value="@DateTime.Now" name="MainDashBoardFilter.ToDate" />
+
+                                    </div>
+                                    <div class="col-md-4"></div>
+                                    <br />
+                                    <br />
+                                    <br />
+
+                                    <div class="col-md-1"></div>
+
+                                    <div class="col-md-4">
+
+                                        <button type="button" id="filterbtn" class="btn btn-primary">
+                                            <i class="la la-filter"></i> فلترة
+                                        </button>
+
+                                        <a class="btn btn-warning mr-1" href="#" onclick="location.reload();">
+                                            <i class="la la-remove"></i> مسح الفلترة
+                                        </a>
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-1">
+                            </div>
+
+                            <div id="notificaitonCountCol" style="visibility:hidden" class="col-xl-9 col-lg-6 col-12">
+                                <a id="anotificaitonCount" href="/Home/Details?queryType=1">
+                                    <div class="card pull-up">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="media-body text-left">
+                                                        <h3 class="info" id="notificaitonCountlbl"></h3>
+                                                        <h3 style="color:black">عدد الطلبات</h3>
+                                                    </div>
+                                                    <div>
+                                                        <i class="icon-basket-loaded info font-large-2 float-right"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+                                                    <div class="progress-bar bg-gradient-x-info" role="progressbar" style="width: 100%" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+
+                            <div class="col-xl-2">
+                            </div>
+
+                            <div class="col-xl-1">
+                            </div>
+
+                            <div id="notificaitonInProccessCountlCol" style="visibility:hidden" class="col-xl-3 col-lg-6 col-12">
+                                <a id="anotificaitonInProccessCount" href="/Home/Details?queryType=2">
+                                    <div class="card pull-up">
+                                        <div class="card-content">
+                                            <div class="card-body" style="width:320.64px; height:137.03px">
+                                                <div class="media d-flex">
+                                                    <div class="media-body text-left">
+                                                        <h3 class="warning" id="notificaitonInProccessCountlbl"></h3>
+                                                        <h3 style="color:black">عدد الطلبات الجاري تنفيذها</h3>
+                                                    </div>
+                                                    <div>
+                                                        <i class="icon-pie-chart warning font-large-2 float-right"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+                                                    <div id="notificaitonInProccessCountprogress" class="progress-bar bg-gradient-x-warning" role="progressbar" style="width: 0%" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div id="notificationFinshCountlCol" style="visibility:hidden" class="col-xl-3 col-lg-6 col-12">
+                                <div class="card pull-up">
+                                    <div class="card-content">
+                                        <div class="card-body" style="width:320.64px; height:137.03px">
+                                            <div class="media d-flex">
+                                                <div class="media-body text-left">
+                                                    <h3 class="success" id="notificationFinshCountlbl"></h3>
+                                                    <h3 style="color:black">عدد الطلبات التي تمت معالجتها</h3>
+                                                </div>
+                                                <div>
+                                                    <i class="icon-user-follow success font-large-2 float-right"></i>
+                                                </div>
+                                            </div>
+                                            <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+                                                <div id="notificationFinshCountprogress" class="progress-bar bg-gradient-x-success" role="progressbar" style="width: 0%" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="targetFauilerCountCol" style="visibility:hidden" class="col-xl-3 col-lg-6 col-12">
+                                <a href="/Failure/Targets">
+                                    <div class="card pull-up">
+                                        <div class="card-content">
+                                            <div class="card-body" style="width:320.64px; height:137.03px">
+                                                <div class="media d-flex">
+                                                    <div class="media-body text-left">
+                                                        <h3 class="danger" id="targetFauilerCountlbl"></h3>
+                                                        <h3 style="color:black">عدد الطلبات الفاشلة</h3>
+                                                    </div>
+                                                    <div>
+                                                        <i class="icon-user-follow success font-large-2 float-right"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+                                                    <div id="targetFauilerCountprogress" class="progress-bar bg-gradient-x-danger" role="progressbar" style="width: 40%" aria-valuemax="100"></div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="col-xl-2">
+                            </div>
+                            <div class="col-xl-1">
+                            </div>
+
+                            <div id="callBackFauilerCountCol" style="visibility:hidden" class="col-xl-3 col-lg-6 col-12">
+                                <a href="/Failure/CallBacks">
+                                    <div class="card pull-up">
+                                        <div class="card-content">
+                                            <div class="card-body" style="width:320.64px; height:137.03px">
+                                                <div class="media d-flex">
+                                                    <div class="media-body text-left">
+                                                        <h3 class="danger" id="callBackFauilerCountlbl"></h3>
+                                                        <h3 style="color:black">عدد الطلبات التي فشل الرد عليها</h3>
+                                                    </div>
+                                                    <div>
+                                                        <i class="icon-user-follow success font-large-2 float-right"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+                                                    <div id="callBackFauilerCountprogress" class="progress-bar bg-gradient-x-danger" role="progressbar" style="width: 100%" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="col-xl-3 col-lg-6 col-12">
+
+                            </div>
+
+
+                        </div>
+                        }
+
+                        @if (User.IsInRole("SYSTEM"))
+                        {
+                        <div class="form form-horizontal striped-rows form-bordered">
+                            <div class="form-body">
+                                <h4 class="form-section"><i class="ft-filter"></i>  @User.Claims.FirstOrDefault(x => x.Type == "SystemName").Value</h4>
+                                <div class="form-group row">
+
+                                    <h3 class="col-md-1 label-control garage-title" style=""></h3>
+
+                                    <div class="col-md-5">
+
+                                    </div>
+
+                                    <br />
+                                    <br />
+                                    <br />
+
+                                    <div class="col-md-6"></div>
+                                    <label class="col-md-1 label-control">من تاريخ</label>
+                                    <div class="col-md-5">
+                                        <input type="text" id="fromDatePciker" readonly class="form-control new-date" value="@DateTime.Now.AddMonths(-3)" name="MainDashBoardFilter.FromDate" />
+                                    </div>
+
+                                    <br />
+                                    <br />
+                                    <br />
+
+                                    <label class="col-md-1 label-control">إلى تاريخ</label>
+                                    <div class="col-md-5">
+                                        <input type="text" id="toDatePicker" class="form-control new-date" readonly value="@DateTime.Now" name="MainDashBoardFilter.ToDate" />
+
+                                    </div>
+
+                                    <br />
+                                    <br />
+                                    <br />
+
+                                    <div class="col-md-1"></div>
+
+                                    <div class="col-md-4">
+
+                                        <button type="button" id="filterbtn" class="btn btn-primary">
+                                            <i class="la la-filter"></i> فلترة
+                                        </button>
+
+                                        <a class="btn btn-warning mr-1" href="#" onclick="location.reload();">
+                                            <i class="la la-remove"></i> مسح الفلترة
+                                        </a>
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-1">
+                            </div>
+
+                            <div id="notificaitonCountCol" style="visibility:hidden" class="col-xl-9 col-lg-6 col-12">
+                                <a href="/Home/Details?queryType=1">
+                                    <div class="card pull-up">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="media-body text-left">
+                                                        <h3 class="info" id="notificaitonCountlbl"></h3>
+                                                        <h3 style="color:black">عدد الطلبات</h3>
+                                                    </div>
+                                                    <div>
+                                                        <i class="icon-basket-loaded info font-large-2 float-right"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+                                                    <div class="progress-bar bg-gradient-x-info" role="progressbar" style="width: 100%" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+
+                            <div class="col-xl-2">
+                            </div>
+
+                            <div class="col-xl-1">
+                            </div>
+
+                            <div id="notificaitonInProccessCountlCol" style="visibility:hidden" class="col-xl-3 col-lg-6 col-12">
+                                <a href="/Home/Details?queryType=2">
+                                    <div class="card pull-up">
+                                        <div class="card-content">
+                                            <div class="card-body" style="width:320.64px; height:137.03px">
+                                                <div class="media d-flex">
+                                                    <div class="media-body text-left">
+                                                        <h3 class="warning" id="notificaitonInProccessCountlbl"></h3>
+                                                        <h3 style="color:black">عدد الطلبات الجاري تنفيذها</h3>
+                                                    </div>
+                                                    <div>
+                                                        <i class="icon-pie-chart warning font-large-2 float-right"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+                                                    <div id="notificaitonInProccessCountprogress" class="progress-bar bg-gradient-x-warning" role="progressbar" style="width: 52%" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div id="notificationFinshCountlCol" style="visibility:hidden" class="col-xl-3 col-lg-6 col-12">
+                                <div class="card pull-up">
+                                    <div class="card-content">
+                                        <div class="card-body" style="width:320.64px; height:137.03px">
+                                            <div class="media d-flex">
+                                                <div class="media-body text-left">
+                                                    <h3 class="success" id="notificationFinshCountlbl"></h3>
+                                                    <h3 style="color:black">عدد الطلبات التي تمت معالجتها</h3>
+                                                </div>
+                                                <div>
+                                                    <i class="icon-user-follow success font-large-2 float-right"></i>
+                                                </div>
+                                            </div>
+                                            <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+                                                <div id="notificationFinshCountprogress" class="progress-bar bg-gradient-x-success" role="progressbar" style="width:0%" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="targetFauilerCountCol" style="visibility:hidden" class="col-xl-3 col-lg-6 col-12">
+                                <a href="/Failure/TargetsForSystem">
+                                    <div class="card pull-up">
+                                        <div class="card-content">
+                                            <div class="card-body" style="width:320.64px; height:137.03px">
+                                                <div class="media d-flex">
+                                                    <div class="media-body text-left">
+                                                        <h3 class="danger" id="targetFauilerCountlbl"></h3>
+                                                        <h3 style="color:black">عدد الطلبات الفاشلة</h3>
+                                                    </div>
+                                                    <div>
+                                                        <i class="icon-user-follow success font-large-2 float-right"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+                                                    <div id="targetFauilerCountprogress" class="progress-bar bg-gradient-x-danger" role="progressbar" style="width: 40%" aria-valuemax="100"></div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="col-xl-2">
+                            </div>
+                            <div class="col-xl-1">
+                            </div>
+
+                            <div id="callBackFauilerCountCol" style="visibility:hidden" class="col-xl-3 col-lg-6 col-12">
+                                <a href="/Failure/CallBackForSystem">
+                                    <div class="card pull-up">
+                                        <div class="card-content">
+                                            <div class="card-body" style="width:320.64px; height:137.03px">
+                                                <div class="media d-flex">
+                                                    <div class="media-body text-left">
+                                                        <h3 class="danger" id="callBackFauilerCountlbl"></h3>
+                                                        <h3 style="color:black">عدد الطلبات التي فشل الرد عليها</h3>
+                                                    </div>
+                                                    <div>
+                                                        <i class="icon-user-follow success font-large-2 float-right"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="progress progress-sm mt-1 mb-0 box-shadow-2">
+                                                    <div id="callBackFauilerCountprogress" class="progress-bar bg-gradient-x-danger" role="progressbar" style="width: 100%" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="col-xl-3 col-lg-6 col-12">
+
+                            </div>
+
+                        </div>
+                        }
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@if (User.IsInRole("ADMIN"))
+{
+<script>
+    let systemCode = 0;
+
+    $(document).ready(function () {
+        $.ajax({
+            type: 'GET',
+            url: '/api/systems',
+            success: function (data) {
+                var systemName = data[0].arName;
+                $('#systemName').val(systemName);
+
+                $('#systemSelect').append($('<option>', {
+                    value: 0,
+                    text: 'جميع الانظمة'
+                }));
+
+                $.each(data, function (i, item) {
+                    $('#systemSelect').append($('<option>', {
+                        value: item.intgerationCode,
+                        text: item.arName
+                    }));
+                });
+            }
+        });
+
+        searchAdmin();
+
+    });
+
+    function searchAdmin() {
+        $.ajax({
+            type: 'GET',
+            url: '/Report/NotificationCount?from=' + $('#fromDatePciker').val() + '&to=' + $('#toDatePicker').val(),
+            success: function (data) {
+                debugger;
+                $('#notificaitonCountCol').css('visibility', 'visible');
+                $('#notificaitonCountlbl').html(data);
+            },
+            async: false
+        });
+
+        $.ajax({
+            type: 'GET',
+            url: '/Report/MessageInProcessCountQuery?from=' + $('#fromDatePciker').val() + '&to=' + $('#toDatePicker').val(),
+            success: function (data) {
+                debugger;
+                $('#notificaitonInProccessCountlCol').css('visibility', 'visible');
+                $('#notificaitonInProccessCountlbl').html(data);
+
+                var totalcount = $('#notificaitonCountlbl').text();
+                var progressscount = ((data / totalcount) * 100);
+                if (isNaN(progressscount))
+                    progressscount = 0;
+                $('#notificaitonInProccessCountprogress').css('width', progressscount + '%');
+            }
+        });
+
+        $.ajax({
+            type: 'GET',
+            url: '/Report/finshNotificationCount?from=' + $('#fromDatePciker').val() + '&to=' + $('#toDatePicker').val(),
+            success: function (data) {
+                debugger;
+                $('#notificationFinshCountlCol').css('visibility', 'visible');
+                $('#notificationFinshCountlbl').html(data);
+
+                var totalcount = $('#notificaitonCountlbl').text();
+                var progressscount = ((data / totalcount) * 100);
+                if (isNaN(progressscount))
+                    progressscount = 0;
+                $('#notificationFinshCountprogress').css('width', progressscount + '%');
+            }
+        });
+
+        $.ajax({
+            type: 'GET',
+            url: '/Report/TargetFailureCountQuery?from=' + $('#fromDatePciker').val() + '&to=' + $('#toDatePicker').val(),
+            success: function (data) {
+                debugger;
+                $('#targetFauilerCountCol').css('visibility', 'visible');
+                $('#targetFauilerCountlbl').html(data);
+
+                var totalcount = $('#notificaitonCountlbl').text();
+                var progressscount = ((data / totalcount) * 100);
+                if (isNaN(progressscount))
+                    progressscount = 0;
+                $('#targetFauilerCountprogress').css('width', progressscount + '%');
+            }
+        });
+
+
+        $.ajax({
+            type: 'GET',
+            url: '/Report/CallBackFailureCountQuery?from=' + $('#fromDatePciker').val() + '&to=' + $('#toDatePicker').val(),
+            success: function (data) {
+                debugger;
+                $('#callBackFauilerCountCol').css('visibility', 'visible');
+                $('#callBackFauilerCountlbl').html(data);
+
+                var totalcount = $('#notificaitonCountlbl').text();
+                var progressscount = ((data / totalcount) * 100);
+                if (isNaN(progressscount))
+                    progressscount = 0;
+                $('#callBackFauilerCountprogress').css('width', progressscount + '%');
+            }
+        });
+    }
+
+    $('#systemSelect').change(function myfuncation() {
+        let systemCode = $('#systemSelect').val();
+        $.ajax({
+            type: 'GET',
+            url: '/Service/GetAllService?systemCode=' + systemCode,
+            success: function (data) {
+                debugger;
+                var select = document.getElementById("serviceSelect");
+                var length = select.options.length;
+                for (i = length - 1; i >= 0; i--) {
+                    select.options[i] = null;
+                }
+
+                $('#serviceSelect').append($('<option>', {
+                    value: 0,
+                    text: 'جميع الخدمات'
+                }));
+
+                $.each(data.data, function (i, item) {
+                    $('#serviceSelect').append($('<option>', {
+                        value: item.serviceCode,
+                        text: item.arDiscription
+                    }));
+                });
+            },
+            async: false
+        });
+    });
+
+    $("#filterbtn").on("click", function (e) {
+        systemCode = $('#systemSelect').val();
+        if (systemCode == 0) {
+            $("#anotificaitonInProccessCount").attr("href", "/Home/Details?queryType=2");
+            $("#anotificaitonCount").attr("href", "/Home/Details?queryType=1");
+            searchAdmin();
+            return;
+        }
+        $("#anotificaitonInProccessCount").attr("href", "/Home/Details?queryType=2&systemCode=" + systemCode);
+        $("#anotificaitonCount").attr("href", "/Home/Details?queryType=1&systemCode=" + systemCode);
+
+        searchSystem(systemCode);
+    });
+
+</script>
+}
+
+@if (User.IsInRole("SYSTEM"))
+{
+<script>
+    $(document).ready(function () {
+        searchSystem(null);
+    });
+</script>
+}
+
+<script>
+    function searchSystem(systemCode) {
+        $.ajax({
+            type: 'GET',
+            url: '/Report/NotificationCountBySystemQuery?systemCode=' + systemCode + '&from=' + $('#fromDatePciker').val() + '&to=' + $('#toDatePicker').val(),
+            success: function (data) {
+                debugger;
+                $('#notificaitonCountCol').css('visibility', 'visible');
+                $('#notificaitonCountlbl').html(data);
+            },
+            async: false
+        });
+
+        $.ajax({
+            type: 'GET',
+            url: '/Report/MessageInProcessCountBySystemQuery?systemCode=' + systemCode + '&from=' + $('#fromDatePciker').val() + '&to=' + $('#toDatePicker').val(),
+            success: function (data) {
+                debugger;
+                $('#notificaitonInProccessCountlCol').css('visibility', 'visible');
+                $('#notificaitonInProccessCountlbl').html(data);
+
+                var totalcount = $('#notificaitonCountlbl').text();
+                var progressscount = ((data / totalcount) * 100);
+                if (isNaN(progressscount))
+                    progressscount = 0;
+                $('#notificaitonInProccessCountprogress').css('width', progressscount + '%');
+            }
+        });
+
+        $.ajax({
+            type: 'GET',
+            url: '/Report/finshNotificationCountBySystemQuery?systemCode=' + systemCode + '&from=' + $('#fromDatePciker').val() + '&to=' + $('#toDatePicker').val(),
+            success: function (data) {
+                debugger;
+                $('#notificationFinshCountlCol').css('visibility', 'visible');
+                $('#notificationFinshCountlbl').html(data);
+
+                var totalcount = $('#notificaitonCountlbl').text();
+                var progressscount = ((data / totalcount) * 100);
+                if (isNaN(progressscount))
+                    progressscount = 0;
+                $('#notificationFinshCountprogress').css('width', progressscount + '%');
+            }
+        });
+
+        $.ajax({
+            type: 'GET',
+            url: '/Report/TargetFailureCountBySystemQuery?systemCode=' + systemCode + '&from=' + $('#fromDatePciker').val() + '&to=' + $('#toDatePicker').val(),
+            success: function (data) {
+                $('#targetFauilerCountCol').css('visibility', 'visible');
+                $('#targetFauilerCountlbl').html(data);
+
+                var totalcount = $('#notificaitonCountlbl').text();
+                var progressscount = ((data / totalcount) * 100);
+                if (isNaN(progressscount))
+                    progressscount = 0;
+                $('#targetFauilerCountprogress').css('width', progressscount + '%');
+            }
+        });
+
+
+        $.ajax({
+            type: 'GET',
+            url: '/Report/CallBackFailureCountBySystemQuery?systemCode=' + systemCode + '&from=' + $('#fromDatePciker').val() + '&to=' + $('#toDatePicker').val(),
+            success: function (data) {
+                debugger;
+                $('#callBackFauilerCountCol').css('visibility', 'visible');
+                $('#callBackFauilerCountlbl').html(data);
+
+                var totalcount = $('#notificaitonCountlbl').text();
+                var progressscount = ((data / totalcount) * 100);
+                if (isNaN(progressscount))
+                    progressscount = 0;
+                $('#callBackFauilerCountprogress').css('width', progressscount + '%');
+            }
+        });
+    }
+</script>
+
+<script>
+
+    // Use datepicker on the date inputs
+    $(".new-date").datepicker({
+        //"dateFormat": "dd-mm-yy",
+
+        onSelect: function (dateText, inst) {
+            $(inst).val(dateText); // Write the value in the input
+        }
+    });
+
+    // Code below to avoid the classic date-picker
+    $("input[type=date]").on('click', function () {
+        return false;
+    });
+</script>
+
